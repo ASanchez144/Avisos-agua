@@ -5,3 +5,4 @@ freshness_minutes:
   saih_cantabrico: 60
   aca: 60
   aemet: 120
+  euskalmet: 60

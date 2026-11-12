@@ -38,6 +38,13 @@ Aviso permanente del proyecto (obligatorio en la UI y presente en todas las resp
 - **Límite de peticiones de la API:** NO VERIFICADO (la página de condiciones de OpenData devolvió 404; `opendata.aemet.es/robots.txt` → 404). Se hacen 6 peticiones cada 15 min.
 - **Aviso:** estas predicciones y datos no son un servicio de emergencia; la nota legal de AEMET lo explica en su sección de responsabilidad.
 
+### Euskalmet — Agencia Vasca de Meteorología (conector `euskalmet`)
+
+- Acceso por la API oficial de Open Data Euskadi (https://api.euskadi.eus/euskalmet) con clave propia gratuita, solicitada por el titular del proyecto.
+- Licencia de reutilización: Open Data Euskadi publica sus datos para reutilización con atribución; **NO VERIFICADO** el texto exacto aplicable a esta API. Pendiente de leer y enlazar antes de un uso más allá del proyecto ciudadano.
+- Uso: 1 petición por estación cada 15 min (48 peticiones por ciclo), User-Agent identificable, robots.txt respetado. La clave privada no se guarda en el repositorio: va en secretos (GitHub Actions y Vercel).
+- Para la verificación (ley 8) se descargaron una vez 4 ficheros de datos que usa la web oficial (`/vamet/stations/readings/...`); robots.txt no lo prohíbe.
+
 ### Otros datos y servicios usados
 
 - **Mapa base (RIESGO LEGAL para producción):** teselas de OpenStreetMap (© colaboradores de OpenStreetMap, ODbL), con atribución visible en el mapa. Su política de uso de teselas no admite uso intensivo: para producción hay que usar un proveedor propio o contratado.

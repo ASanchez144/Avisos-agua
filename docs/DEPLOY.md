@@ -37,6 +37,17 @@ Repositorio → **Settings → Secrets and variables → Actions → New reposit
 
 El repositorio debe ser **público** (Actions es gratis solo así; ahora lo es). Los secretos no aparecen en los logs.
 
+### Euskalmet (opcional: ríos del País Vasco)
+
+Añade en GitHub Secrets **y** en Vercel (Settings → Environment Variables, Production):
+
+| Nombre | Valor |
+|---|---|
+| `EUSKALMET_PRIVATE_KEY` | el contenido completo de tu clave privada `.pem` (desde `-----BEGIN` hasta `END-----`) |
+| `EUSKALMET_EMAIL` | el email con el que diste de alta la clave en Euskalmet |
+
+El colector firma un JWT nuevo en cada ciclo. Sin estas dos variables Euskalmet no se consulta (no aparece como caído).
+
 ## 3. Primera ejecución del colector
 
 Pestaña **Actions → collector → Run workflow**. Debe terminar en verde en ~1 min. En el log aparece un JSON con una entrada por fuente (`saih_cantabrico`, `aca`, `aemet`, `aemet:avisos`) con `"ok": true` y el nº de lecturas. Un conector que falla sale con `"ok": false` y su error, **sin tumbar el ciclo** (el job solo falla si no hay base de datos).

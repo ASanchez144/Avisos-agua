@@ -302,3 +302,88 @@ CASES.append(HarnessCase(
     reference_dir=_AEMET_REFERENCE, official_values=_aemet_official_values,
     unsupported_fields=frozenset(_AEMET_UNSUPPORTED),
 ))
+
+
+# ----------------------------------------------------------------- Euskalmet
+
+from connectors import euskalmet  # noqa: E402
+
+_EUS_FIX = TESTS / "fixtures" / "euskalmet"
+_EUS_REFERENCE = TESTS / "reference" / "euskalmet"
+_EUS_STATION = "C084"
+# La API publica el caudal sin unidad, la lluvia solo por tramos de 10 min y ningún umbral.
+_EUS_UNSUPPORTED = {"flow_m3s", "rain_1h_mm", "rain_24h_mm", "thresholds.yellow", "thresholds.orange", "thresholds.red"}
+
+
+def _eus_now() -> datetime:
+    text = (_EUS_FIX / "readings_hourly.fetched_at_utc.txt").read_text().strip()
+    return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+
+
+def _eus_responses() -> dict[str, dict[str, Any]]:
+    raw = json.loads((_EUS_FIX / "readings_hourly.json").read_text(encoding="utf-8"))["responses"]
+    return {path: json.loads(body) for path, body in raw.items()}
+
+
+def _eus_parse(responses: dict[str, dict[str, Any]], inventory: list[dict[str, Any]]) -> list[Reading]:
+    payloads: dict[str, list[bytes]] = {}
+    for path in sorted(responses, reverse=True):  # la hora más reciente primero
+        station = path.split("/")[3]
+        payloads.setdefault(station, []).append(json.dumps(responses[path]).encode("iso-8859-1"))
+    return euskalmet.parse(inventory, payloads, _eus_now())
+
+
+def _eus_inject(overrides: dict[str, Any]) -> Reading:
+    unsupported = set(overrides) & _EUS_UNSUPPORTED
+    if unsupported:
+        raise UnsupportedVariable(f"euskalmet no publica {sorted(unsupported)}")
+    responses = _eus_responses()
+    inventory = copy.deepcopy(euskalmet.load_inventory())
+    station = next(s for s in inventory if s["id"] == _EUS_STATION)
+    path = max(p for p in responses if p.split("/")[3] == _EUS_STATION)
+    hour = responses[path]
+    index = max(i for i, v in enumerate(hour["values"]) if v is not None)
+    for field, value in overrides.items():
+        if field == "level_m":
+            hour["values"][index] = value
+        elif field == "timestamp_utc":
+            start = value.astimezone(timezone.utc).replace(minute=0, second=0, microsecond=0)
+            current = hour["values"][index]
+            hour["values"] = [None] * len(hour["values"])
+            index = value.astimezone(timezone.utc).minute // 10
+            hour["values"][index] = current
+            ms = int(start.timestamp() * 1000)
+            hour["dateRange"] = f"Date:({ms}..{ms + 3599999})"
+        elif field in ("lat", "lon"):
+            station[field] = value
+    for other in [p for p in responses if p.split("/")[3] == _EUS_STATION and p != path]:
+        del responses[other]  # solo la hora inyectada
+    return next(r for r in _eus_parse(responses, inventory) if r.station_id == f"{euskalmet.SOURCE}:{_EUS_STATION}")
+
+
+def _eus_official_values() -> list[OfficialValue]:
+    """Series que la web oficial www.euskalmet.euskadi.eus carga para su gráfica de estación
+    (tests/reference/euskalmet/web_<estación>_<AAAAMMDD>.json). Horas "HH:MM" locales = inicio del
+    tramo de 10 min. Solo se compara la medida de nivel que usa el conector (inventario)."""
+    measure = {s["id"]: s["level_measure"] for s in euskalmet.load_inventory()}
+    out: list[OfficialValue] = []
+    for file in sorted(_EUS_REFERENCE.glob("web_*.json")):
+        _, station, day = file.stem.split("_")
+        for entry in json.loads(file.read_bytes().decode("iso-8859-1")).values():
+            if entry.get("type") != "measuresForWater" or entry.get("name") != measure.get(station):
+                continue
+            for series in entry["data"].values():
+                for clock, shown in series.items():
+                    local = datetime.strptime(f"{day} {clock}", "%Y%m%d %H:%M").replace(tzinfo=_MADRID)
+                    out.append(OfficialValue(f"{euskalmet.SOURCE}:{station}", "level_m", repr(shown),
+                                             local.astimezone(timezone.utc)))
+    return out
+
+
+CASES.append(HarnessCase(
+    source=euskalmet.SOURCE, fixture_now=_eus_now(),
+    parse_fixture=lambda: _eus_parse(_eus_responses(), euskalmet.load_inventory()),
+    fetch_live=lambda: euskalmet.EuskalmetConnector().fetch(), inject=_eus_inject,
+    reference_dir=_EUS_REFERENCE, official_values=_eus_official_values,
+    unsupported_fields=frozenset(_EUS_UNSUPPORTED),
+))

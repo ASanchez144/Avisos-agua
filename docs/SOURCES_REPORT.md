@@ -201,6 +201,18 @@ Ver "Limitaciones del entorno". Sin respuesta real no hay URL, campos, frecuenci
 
 ---
 
+## 15. Euskalmet (País Vasco) — USABLE (verificado con clave el 2026-11-12)
+
+- API oficial https://api.euskadi.eus/euskalmet, clave gratuita, autenticación JWT RS256 firmada con la clave privada del usuario.
+- 154 estaciones: 59 de aforo (GAUGING), 61 meteorológicas, 26 de calidad del agua y 8 boyas.
+- Nivel de la lámina de agua (`measuresForWater/sheet_level_*`, unidad METERS publicada por `/euskalmet/measures`) cada 10 min,
+  hora en UTC (`dateRange` en epoch ms), `null` cuando falta el dato. Retraso medido: unos 7 min.
+- Conector `euskalmet`: 48 estaciones de nivel (inventario en `engine/euskalmet_stations.json`). Una petición por estación y ciclo (12 s en total).
+- Contrastado con la web oficial (www.euskalmet.euskadi.eus/vamet/...): los valores de todos los tramos comunes coinciden exactamente.
+- NO VERIFICADO: unidad del caudal calculado (la API no la publica); acumulados de lluvia (solo tramos de 10 min). Sin umbrales publicados.
+- Tobillas (C00B) publica una cota (694 m), no un calado: sale SUSPECT, sin semáforo.
+- El endpoint agregado por día rellena los huecos con 0.0: no se usa.
+
 ## Orden de implementación propuesto (por fiabilidad)
 
 1. **SAI Cantábrico** — una petición, GeoJSON, coordenadas, timestamps por variable, umbrales oficiales, robots lo permite, reutilización autorizada citando fuente. Cubre todo el esquema común.

@@ -14,6 +14,7 @@ from backend.db import Database
 from backend.scheduler import run_cycle
 from connectors.aca import AcaConnector
 from connectors.aemet import AemetConnector
+from connectors.euskalmet import EuskalmetConnector
 from connectors.http import PoliteHttpClient
 from connectors.saih_cantabrico import SaihCantabricoConnector
 
@@ -24,10 +25,19 @@ def database_url() -> str:
     return os.environ.get("DATABASE_URL") or os.environ.get("HIDRORED_DB") or "data/hidrored.sqlite"
 
 
-def build_connectors(db: Database, include_aemet: bool = True) -> list:
+def has_euskalmet(env=os.environ) -> bool:
+    """Euskalmet necesita clave propia: sin ella no se intenta (no se pinta como caída)."""
+    return bool(env.get("EUSKALMET_PRIVATE_KEY") and env.get("EUSKALMET_EMAIL")) or bool(env.get("EUSKALMET_JWT"))
+
+
+def build_connectors(db: Database, include_aemet: bool = True, include_euskalmet: bool | None = None) -> list:
     client = PoliteHttpClient(store=db)
     connectors = [SaihCantabricoConnector(client), AcaConnector(client)]
-    return connectors + [AemetConnector(client)] if include_aemet else connectors
+    if include_aemet:
+        connectors.append(AemetConnector(client))
+    if has_euskalmet() if include_euskalmet is None else include_euskalmet:
+        connectors.append(EuskalmetConnector(client))
+    return connectors
 
 
 def main() -> int:

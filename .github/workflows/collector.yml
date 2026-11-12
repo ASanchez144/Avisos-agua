@@ -30,5 +30,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           AEMET_API_KEY: ${{ secrets.AEMET_API_KEY }}
+          EUSKALMET_PRIVATE_KEY: ${{ secrets.EUSKALMET_PRIVATE_KEY }}
+          EUSKALMET_EMAIL: ${{ secrets.EUSKALMET_EMAIL }}
         run: python -m collector.run_once
 

@@ -31,6 +31,10 @@ else:
     client = PoliteHttpClient(store=db)
     # AEMET necesita AEMET_API_KEY; sin ella su ciclo queda registrado como fallo (SIN_DATOS), no se oculta.
     connectors = [SaihCantabricoConnector(client), AcaConnector(client), AemetConnector(client)]
+    from collector.run_once import has_euskalmet
+    if has_euskalmet():  # Euskalmet: EUSKALMET_PRIVATE_KEY + EUSKALMET_EMAIL
+        from connectors.euskalmet import EuskalmetConnector
+        connectors.append(EuskalmetConnector(client))
 
     @asynccontextmanager
     async def lifespan(_app):

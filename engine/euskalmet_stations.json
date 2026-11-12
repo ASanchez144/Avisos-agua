@@ -1,0 +1,438 @@
+{
+ "source": "https://api.euskadi.eus/euskalmet (stations/current + readings/aggregated/byDay)",
+ "generated_at_utc": "2026-11-12T13:20:01Z",
+ "stations": [
+  {
+   "id": "C004",
+   "name": "Bakio",
+   "municipality": "Bakio",
+   "lat": 43.4168,
+   "lon": -2.8124,
+   "level_sensor": "UL04",
+   "level_measure": "sheet_level_3"
+  },
+  {
+   "id": "C005",
+   "name": "Gatika",
+   "municipality": "Gatika",
+   "lat": 43.3723,
+   "lon": -2.90829,
+   "level_sensor": "RA05",
+   "level_measure": "sheet_level_3"
+  },
+  {
+   "id": "C006",
+   "name": "Markina",
+   "municipality": "Markina-Xemein",
+   "lat": 43.2655,
+   "lon": -2.49565,
+   "level_sensor": "UI06",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C008",
+   "name": "Zeanuri",
+   "municipality": "Zeanuri",
+   "lat": 43.09858,
+   "lon": -2.74988,
+   "level_sensor": "UI08",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C009",
+   "name": "Galdakao",
+   "municipality": "Galdakao",
+   "lat": 43.2342345,
+   "lon": -2.8703215,
+   "level_sensor": "UI09",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C00B",
+   "name": "Tobillas",
+   "municipality": "Valdegovía/Gaubea",
+   "lat": 42.8992411,
+   "lon": -3.1828238,
+   "level_sensor": "ISCM",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C00C",
+   "name": "Goiain",
+   "municipality": "Legutio",
+   "lat": 42.9444721,
+   "lon": -2.6415097,
+   "level_sensor": "IS0C",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C010",
+   "name": "Abetxuko-CHE",
+   "municipality": "Vitoria-Gasteiz",
+   "lat": 42.8729023,
+   "lon": -2.6765434,
+   "level_sensor": "CHN10",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C011",
+   "name": "Mungia-Lauaxeta",
+   "municipality": "Mungia",
+   "lat": 43.3561131,
+   "lon": -2.8499509,
+   "level_sensor": "RA11",
+   "level_measure": "sheet_level_3"
+  },
+  {
+   "id": "C012",
+   "name": "Zurbano-Alegría-CHE",
+   "municipality": "Vitoria-Gasteiz",
+   "lat": 42.8668213,
+   "lon": -2.6371255,
+   "level_sensor": "CHN12",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C032",
+   "name": "Areta",
+   "municipality": "Orozko",
+   "lat": 43.1394,
+   "lon": -2.93531,
+   "level_sensor": "I032",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C051",
+   "name": "Saratxo",
+   "municipality": "Amurrio",
+   "lat": 43.0342,
+   "lon": -3.00398,
+   "level_sensor": "ISAJ",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C052",
+   "name": "Ameraun",
+   "municipality": "Berastegi",
+   "lat": 43.1417,
+   "lon": -1.95085,
+   "level_sensor": "ISR7",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C054",
+   "name": "Otxandio",
+   "municipality": "Otxandio",
+   "lat": 43.0423,
+   "lon": -2.65763,
+   "level_sensor": "IS74",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C055",
+   "name": "Ozaeta",
+   "municipality": "Barrundia",
+   "lat": 42.913,
+   "lon": -2.49313,
+   "level_sensor": "IS55",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C057",
+   "name": "Mungia",
+   "municipality": "Mungia",
+   "lat": 43.363,
+   "lon": -2.84702,
+   "level_sensor": "RC57",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C076",
+   "name": "Abetxuko",
+   "municipality": "Vitoria-Gasteiz",
+   "lat": 42.8755,
+   "lon": -2.66879,
+   "level_sensor": "IS70",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C081",
+   "name": "Martutene",
+   "municipality": "Donostia / San Sebastián",
+   "lat": 43.297,
+   "lon": -1.95634,
+   "level_sensor": "UL81",
+   "level_measure": "sheet_level_3"
+  },
+  {
+   "id": "C082",
+   "name": "Txomin Enea",
+   "municipality": "Donostia / San Sebastián",
+   "lat": 43.3076,
+   "lon": -1.96198,
+   "level_sensor": "CS82",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C083",
+   "name": "Jaizubia",
+   "municipality": "Irun",
+   "lat": 43.3402,
+   "lon": -1.82138,
+   "level_sensor": "I083",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C084",
+   "name": "Behobia",
+   "municipality": "Irun",
+   "lat": 43.346,
+   "lon": -1.76117,
+   "level_sensor": "RA01",
+   "level_measure": "sheet_level_3"
+  },
+  {
+   "id": "C085",
+   "name": "Eibar",
+   "municipality": "Eibar",
+   "lat": 43.1921,
+   "lon": -2.4542,
+   "level_sensor": "IS99",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C086",
+   "name": "Inurritza",
+   "municipality": "Zarautz",
+   "lat": 43.2779811,
+   "lon": -2.1693568,
+   "level_sensor": "IS86",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0A0",
+   "name": "Sarria",
+   "municipality": "Zuia",
+   "lat": 42.9798,
+   "lon": -2.8302,
+   "level_sensor": "ISB9",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0A1",
+   "name": "Pagoeta",
+   "municipality": "Peñacerrada-Urizaharra",
+   "lat": 42.64782,
+   "lon": -2.72441,
+   "level_sensor": "ISA1",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0A2",
+   "name": "Egino",
+   "municipality": "Asparrena",
+   "lat": 42.86831,
+   "lon": -2.25319,
+   "level_sensor": "ISA2",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0A3",
+   "name": "Antoñana",
+   "municipality": "Campezo/Kanpezu",
+   "lat": 42.6784637,
+   "lon": -2.3901665,
+   "level_sensor": "ISBS",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0A4",
+   "name": "Albaina",
+   "municipality": "Condado de Treviño",
+   "lat": 42.692483,
+   "lon": -2.631363,
+   "level_sensor": "IS23",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0AA",
+   "name": "Etura",
+   "municipality": "Barrundia",
+   "lat": 42.8878,
+   "lon": -2.50361,
+   "level_sensor": "ISP4",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0AB",
+   "name": "Nanclares",
+   "municipality": "Iruña Oka/Iruña de Oca",
+   "lat": 42.7934863,
+   "lon": -2.8239093,
+   "level_sensor": "ISAB",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0B0",
+   "name": "La Merced",
+   "municipality": "Bilbao",
+   "lat": 43.2596,
+   "lon": -2.92679,
+   "level_sensor": "ISB0",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0B3",
+   "name": "Urkizu",
+   "municipality": "Igorre",
+   "lat": 43.1849,
+   "lon": -2.7721,
+   "level_sensor": "ISAJ",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0B5",
+   "name": "Oromino",
+   "municipality": "Iurreta",
+   "lat": 43.1920372,
+   "lon": -2.6767982,
+   "level_sensor": "IS20",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0B8",
+   "name": "Larrainazubi",
+   "municipality": "Getxo",
+   "lat": 43.3463,
+   "lon": -2.99932,
+   "level_sensor": "RA03",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0B9",
+   "name": "Sangroniz",
+   "municipality": "Sondika",
+   "lat": 43.2893,
+   "lon": -2.9308,
+   "level_sensor": "ISF7",
+   "level_measure": "sheet_level_3"
+  },
+  {
+   "id": "C0BD",
+   "name": "Iruzubieta",
+   "municipality": "Ziortza-Bolibar",
+   "lat": 43.2584,
+   "lon": -2.526,
+   "level_sensor": "IEAD",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0C0",
+   "name": "Zalla",
+   "municipality": "Zalla",
+   "lat": 43.2140004,
+   "lon": -3.13522,
+   "level_sensor": "ISC0",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0C1",
+   "name": "Aranguren",
+   "municipality": "Zalla",
+   "lat": 43.2117,
+   "lon": -3.12755,
+   "level_sensor": "ISCZ",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0C5",
+   "name": "Arenao",
+   "municipality": "Galdames",
+   "lat": 43.2807248,
+   "lon": -3.1394712,
+   "level_sensor": "RAC5",
+   "level_measure": "sheet_level_3"
+  },
+  {
+   "id": "C0C9",
+   "name": "Karrantza",
+   "municipality": "Karrantza Harana/Valle de Carranza",
+   "lat": 43.2517077,
+   "lon": -3.3927446,
+   "level_sensor": "IS11",
+   "level_measure": "sheet_level_3"
+  },
+  {
+   "id": "C0CA",
+   "name": "Arbina",
+   "municipality": "Amoroto",
+   "lat": 43.333341,
+   "lon": -2.497656,
+   "level_sensor": "ISCA",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0CB",
+   "name": "Pando",
+   "municipality": "Trucios-Turtzioz",
+   "lat": 43.2756913,
+   "lon": -3.2584079,
+   "level_sensor": "IS53",
+   "level_measure": "sheet_level_3"
+  },
+  {
+   "id": "C0D0",
+   "name": "Urkulu",
+   "municipality": "Aretxabaleta",
+   "lat": 43.013,
+   "lon": -2.47239,
+   "level_sensor": "RMD1",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0D3",
+   "name": "Aixola",
+   "municipality": "Elgeta",
+   "lat": 43.1547,
+   "lon": -2.50123,
+   "level_sensor": "ISBF",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0DE",
+   "name": "Matxinbenta",
+   "municipality": "Beasain",
+   "lat": 43.1135,
+   "lon": -2.23513,
+   "level_sensor": "ISBP",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0E1",
+   "name": "Amundarain",
+   "municipality": "Zaldibia",
+   "lat": 43.0335,
+   "lon": -2.15086,
+   "level_sensor": "DRE1",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0E5",
+   "name": "Agauntza",
+   "municipality": "Ataun",
+   "lat": 43.0179,
+   "lon": -2.17748,
+   "level_sensor": "PRE5",
+   "level_measure": "sheet_level_2"
+  },
+  {
+   "id": "C0E8",
+   "name": "Araxes",
+   "municipality": "Lizartza",
+   "lat": 43.1148,
+   "lon": -2.04772,
+   "level_sensor": "ISBQ",
+   "level_measure": "sheet_level_2"
+  }
+ ]
+}
