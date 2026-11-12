@@ -8,14 +8,15 @@
 """
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 from urllib.parse import urlencode, urlsplit
 
 import httpx
 
-from connectors.base import RobotsDisallowedError, SourceUnavailableError
+from connectors.base import RateLimitedError, RobotsDisallowedError, SourceUnavailableError
 from connectors.robots import is_allowed
 
 DEFAULT_USER_AGENT = "HidroRed/0.1 (radar ciudadano hidrologico no oficial; scraping responsable)"
@@ -47,7 +48,11 @@ class PoliteHttpClient:
         timeout_s: float = 30.0,
         transport: Optional[httpx.BaseTransport] = None,
         now: Callable[[], datetime] = _utcnow,
+        store: Optional[Any] = None,
     ) -> None:
+        # `store`: objeto con last_request(key)/mark_request(key, at) (p. ej. backend.db.Database).
+        # Guarda la hora de la última petición a cada recurso y sobrevive a reinicios.
+        self.store = store
         self.user_agent = user_agent
         self.min_interval = min_interval
         self._now = now
@@ -106,7 +111,15 @@ class PoliteHttpClient:
             return replace(outcome, from_cache=True)
 
         started = self._now()
+        digest = hashlib.sha256("|".join(key).encode()).hexdigest()[:32]
+        if self.store is not None and previous is None:
+            last = self.store.last_request(digest)
+            if last is not None and started - last < self.min_interval - SCHEDULER_JITTER:
+                wait = int((self.min_interval - (started - last)).total_seconds() // 60) + 1
+                raise RateLimitedError(f"{method} {url}: última petición hace menos de 15 min (faltan ~{wait} min)")
         self._check_robots(url)
+        if self.store is not None:
+            self.store.mark_request(digest, started)
         try:
             resp = self._client.request(method, url, data=data, headers=headers)
             if resp.status_code != 200:

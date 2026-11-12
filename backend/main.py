@@ -27,8 +27,8 @@ if DEMO:
     connectors: list = []
     app = create_demo_app()
 else:
-    db = Database(os.environ.get("HIDRORED_DB", "data/hidrored.sqlite"))
-    client = PoliteHttpClient()
+    db = Database(os.environ.get("DATABASE_URL") or os.environ.get("HIDRORED_DB", "data/hidrored.sqlite"))
+    client = PoliteHttpClient(store=db)
     # AEMET necesita AEMET_API_KEY; sin ella su ciclo queda registrado como fallo (SIN_DATOS), no se oculta.
     connectors = [SaihCantabricoConnector(client), AcaConnector(client), AemetConnector(client)]
 

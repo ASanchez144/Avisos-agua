@@ -9,7 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 from backend.db import Database
-from connectors.base import Connector
+from connectors.base import Connector, RateLimitedError
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +29,10 @@ def run_cycle(
         started = now()
         try:
             readings = connector.fetch()
+        except RateLimitedError as exc:  # no es un fallo: se conservan los datos y el estado anteriores
+            log.info("fuente %s omitida: %s", connector.source, exc)
+            summary[connector.source] = {"ok": True, "readings": 0, "error": None, "skipped": "límite de 15 min"}
+            continue
         except Exception as exc:  # cualquier fallo de una fuente es SIN_DATOS, nunca una caída
             error = f"{type(exc).__name__}: {exc}"
             log.error("fuente %s falló: %s", connector.source, error)
@@ -41,6 +45,9 @@ def run_cycle(
     for connector in connectors:
         if hasattr(connector, "fetch_warnings"):
             summary[f"{connector.source}:avisos"] = _warnings_cycle(connector, db, now)
+    if hasattr(db, "purge_older_than"):
+        purged = db.purge_older_than(now())
+        log.info("retención 7 días: %s", purged)
     return summary
 
 
@@ -49,6 +56,8 @@ def _warnings_cycle(connector: Any, db: Database, now: Callable[[], datetime]) -
     name, started = f"{connector.source}:avisos", now()
     try:
         warnings = [w.to_dict() for w in connector.fetch_warnings()]
+    except RateLimitedError:
+        return {"ok": True, "readings": 0, "error": None, "skipped": "límite de 15 min"}
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
         log.error("fuente %s falló: %s", name, error)

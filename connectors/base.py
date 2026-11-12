@@ -26,6 +26,10 @@ class SourceFormatError(ConnectorError):
     """La fuente respondió, pero no con el formato verificado en la Fase 0."""
 
 
+class RateLimitedError(ConnectorError):
+    """Límite de 1 petición/15 min por recurso: esta vuelta no se pide (no es un fallo)."""
+
+
 class RobotsDisallowedError(ConnectorError):
     """robots.txt de la fuente no permite pedir ese recurso."""
 
