@@ -173,7 +173,8 @@ class Prober:
                 continue
             if re.search(r"\.(png|jpg|gif|css|js|pdf|ico|svg)(\?|$)", url, re.I):
                 continue
-            if KEYWORDS.search(url) or KEYWORDS.search(text):
+            parts = urlsplit(url)
+            if KEYWORDS.search(parts.path + "?" + parts.query) or KEYWORDS.search(text):  # nunca el dominio
                 found.setdefault(url, " ".join(text.split())[:40])
         return list(found.items())[:MAX_DISCOVERED]
 
