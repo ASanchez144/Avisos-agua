@@ -55,3 +55,9 @@ def test_un_fallo_del_colector_no_tumba_la_api(tmp_path):
     body = c.post("/collect").json()
     assert body["ran"] is False and "RuntimeError" in body["reason"]
     assert c.get("/stations").status_code == 200
+
+
+def test_collect_acepta_get_para_programadores_externos(tmp_path):
+    db, llamadas = Database(tmp_path / "a.sqlite"), []
+    body = app(db, llamadas).get("/collect").json()
+    assert body["ran"] is True and llamadas == [1]

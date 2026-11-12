@@ -146,7 +146,7 @@ def create_app(
             raise HTTPException(status_code=404, detail="cámara no encontrada")
         return envelope(camera_id=camera_id, **checker.status(cam.image_url))
 
-    @app.post("/collect")
+    @app.api_route("/collect", methods=["GET", "POST"])
     def collect() -> dict[str, Any]:
         """Lanza un ciclo de recogida si los datos tienen más de ~15 min. Respaldo del cron: la propia web lo
         pide al abrirse. Seguro ante abusos: el límite de 1 petición/15 min por recurso está en la base de datos."""
