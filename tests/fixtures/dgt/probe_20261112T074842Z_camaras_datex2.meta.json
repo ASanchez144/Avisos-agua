@@ -1,0 +1,11 @@
+{
+ "url": "https://nap.dgt.es/datex2/v3/dgt/DevicePublication/camaras_datex2_v37.xml",
+ "method": "GET",
+ "status": 200,
+ "content_type": "text/xml; charset=utf-8",
+ "bytes": 3742464,
+ "sha256": "27301380fe372b3218aea2a7acdef4a78d2af73b990b89dd778ea7a902845013",
+ "fetched_at_utc": "20261112T074842Z",
+ "file": "probe_20261112T074842Z_camaras_datex2.xml.gz",
+ "elapsed_s": 0.08
+}
