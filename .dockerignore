@@ -1,0 +1,7 @@
+frontend
+tests
+docs
+data
+**/__pycache__
+.pytest_cache
+.env

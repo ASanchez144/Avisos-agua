@@ -1,0 +1,25 @@
+# Un solo comando:  docker compose up --build
+# Web:  http://localhost:8080      API:  http://localhost:8000
+services:
+  backend:
+    build: .
+    environment:
+      HIDRORED_DB: /app/data/hidrored.sqlite
+      AEMET_API_KEY: ${AEMET_API_KEY:-}
+      DEMO_LIVE_FALLBACK: ${DEMO_LIVE_FALLBACK:-false}
+    volumes:
+      - hidrored_data:/app/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+volumes:
+  hidrored_data:
