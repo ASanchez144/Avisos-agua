@@ -1,36 +1,46 @@
-# Fuentes omitidas en la Fase 2 y por qué
+# Fuentes omitidas y por qué
 
-Regla aplicada: un conector solo para fuentes con veredicto **USABLE** en `SOURCES_REPORT.md`. No se inventan sustitutos.
+Regla: un conector solo para fuentes con veredicto **USABLE**. No se inventan sustitutos.
+Dos motivos distintos, que no se deben confundir:
+
+- **NO_USABLE** — se ha podido comprobar y la fuente no sirve (o no se nos permite usarla).
+- **BLOQUEADO_POR_ENTORNO** — la fuente **no se ha podido probar** porque es inalcanzable desde el contenedor de desarrollo (timeout, TLS, filtrado por IP). **No está descartada**: puede funcionar desde una IP española. Se prueban con `scripts/probe_sources.py` (ver README).
 
 ## Con conector (3)
 
 | Fuente | Conector | Aporta |
 |---|---|---|
 | SAI Cantábrico | `connectors/saih_cantabrico.py` | caudal, nivel, lluvia 1 h y 24 h, embalses, umbrales oficiales |
-| ACA Cataluña (API SDIM2) | `connectors/aca.py` | caudal, nivel, embalses. Sin umbrales |
-| AEMET OpenData | `connectors/aemet.py` | lluvia de la última hora por estación, avisos CAP con polígonos, inventario |
+| ACA Cataluña (API SDIM2) | `connectors/aca.py` | caudal, nivel, embalses. Sin umbrales. ⚠️ RIESGO LEGAL (ver LEGAL.md) |
+| AEMET OpenData | `connectors/aemet.py` | lluvia de la última hora, avisos CAP con polígonos, inventario |
 
-## Omitidas
+## NO_USABLE
 
-| Fuente | Veredicto Fase 0 | Motivo de la omisión |
+| Fuente | Motivo comprobado |
+|---|---|
+| SAIH Júcar (`saih.chj.es`) | El WAF respondió "Request Rejected" al User-Agent identificable: **acceso rechazado explícitamente**. No se rodea. Falta confirmar si con IP española responde igual (está en el script de pruebas); si sigue rechazando, hay que pedir permiso a la CHJ. |
+| ACA — dataset `gn9e-3qhr` | Redundante y peor que SDIM2: dato diario, sin coordenadas (incumpliría L4). |
+| ACA — pluviómetros SDIM2 | Solo intensidad instantánea (mm/h), no acumulado de 1 h: mapearla sería inventar. |
+| AEMET — `rain_24h_mm` | La API trae ~12 h por estación: no se puede sumar 24 h sin inventar. |
+| AEMET — radar nacional | La ruta devolvió `estado 404` en todos los intentos. |
+| Hidrosur | HTML frágil, valores medios horarios y sin permiso expreso de reutilización. |
+| SAIH Guadalquivir | HTML por zonas sin coordenadas ni fecha por lectura (reutilizable citando origen: sería la mejor de este grupo). |
+| SAIH Tajo | Tokens cifrados encadenados, sin fecha por lectura y `robots.txt` que excluye `/?w=`. Requiere hablar con la CHT. |
+| SAIH Segura | Sin coordenadas, sin fecha por lectura, sin umbrales. |
+| MITECO FeatureServer SAIH | No da lecturas. Sí se usa como inventario (coordenadas y cotas de `river_links.yaml`). |
+| DGT cámaras (DATEX II) | No es fuente de lecturas hidrológicas; se integra aparte (Bloque 5: solo ver la imagen). Licencia del NAP sin verificar. |
+
+## BLOQUEADO_POR_ENTORNO (no probadas, no descartadas)
+
+| Fuente | Qué pasó desde el contenedor | Siguiente paso |
 |---|---|---|
-| ACA — dataset `gn9e-3qhr` | USABLE (limitado) | Redundante y peor: son los mismos embalses que ya da SDIM2 en tiempo real, pero con un dato diario y **sin coordenadas** (todas las lecturas incumplirían L4). |
-| ACA — lluvia (pluviómetros SDIM2) | — | Publica intensidad instantánea en mm/h, no acumulado de 1 h. Mapearla a `rain_1h_mm` sería inventar. |
-| ACA — umbrales | — | El visor oficial `aetr.aca.gencat.cat` carga umbrales desde `api.aetr.aca.gencat.cat/Threshold/...`, pero tras una autorización "public" propia del visor. No verificado ni usado: hoy ACA sale como "umbral no publicado". |
-| DGT — cámaras (DATEX II) | USABLE | No es una fuente de lecturas hidrológicas: no encaja en el esquema común ni en el arnés (exige valores medidos). Además la licencia del NAP está NO VERIFICADA. Queda como módulo aparte pendiente. |
-| AEMET — radar nacional | — | La ruta devolvió `estado 404` en todos los intentos. |
-| AEMET — `rain_24h_mm` | — | La API trae ~12 h por estación: no se puede sumar 24 h sin inventar. |
-| Hidrosur | USABLE CON SCRAPING FRÁGIL | No es USABLE: HTML frágil, valores medios horarios y sin permiso expreso de reutilización. |
-| SAIH Guadalquivir | USABLE CON SCRAPING FRÁGIL | No es USABLE: HTML por zonas, sin coordenadas ni fecha por lectura. |
-| SAIH Tajo | USABLE CON SCRAPING FRÁGIL | No es USABLE: tokens cifrados, sin fecha por lectura y `robots.txt` dudoso. Requiere hablar con la CHT. |
-| SAIH Segura | USABLE CON SCRAPING FRÁGIL | No es USABLE: sin coordenadas, sin fecha por lectura, sin umbrales. |
-| MITECO FeatureServer SAIH | Inventario | No da lecturas. Sí se usó para coordenadas y cotas oficiales de `engine/river_links.yaml`. |
-| SAIH Júcar | NO USABLE | El WAF rechaza el User-Agent identificable. No se rodea. |
-| SAIH Ebro | NO VERIFICABLE | Inalcanzable desde el entorno de verificación (corte de conexión a los 10 s). |
-| SAIH Duero | NO VERIFICABLE | 502 del gateway. |
-| SAIH Miño-Sil | NO VERIFICABLE | Cadena de certificados TLS no validable; no se desactiva la verificación. |
+| SAIH Ebro (`saihebro.com`) | Corte de la conexión a los 10 s en 8 de 8 intentos (TLS 1.2 y 1.3) | `probe_sources.py` desde España |
+| SAIH Duero (`saihduero.es`) | 502 del gateway al CONNECT | idem |
+| SAIH Miño-Sil (`saih.chminosil.es`) | Cadena de certificados no verificable (no se desactiva TLS) | idem |
+| MITECO WMS aforos (`wms.mapama.gob.es`) | Cadena de certificados no verificable | idem |
+| Overpass (OpenStreetMap) y Wikipedia API | Inalcanzable / 429 | `scripts/measure_channel.py` desde tu PC |
 
-## Consecuencias que conviene saber
+## Consecuencias
 
-- **Los enlaces de propagación del Aragón–Ebro y del Barranco del Poyo no tienen caudal en vivo** (Ebro y Júcar sin conector). El de Jaca puede dispararse por lluvia en la estación AEMET de Jaca; los del Poyo, hoy, no pueden dispararse. Los enlaces del Eo (Cantábrico) sí funcionan en vivo.
-- **Las estaciones AEMET salen casi siempre como "dato antiguo":** AEMET publica el acumulado horario con más de una hora de retraso y la regla del proyecto marca obsoleto a partir de 60 min. El motor de propagación sí las usa (admite hasta 120 min).
+- Los enlaces de propagación del **Aragón–Ebro** y del **Barranco del Poyo** no tienen caudal en vivo (Ebro y Júcar sin conector): hoy solo Jaca puede dispararse, por lluvia AEMET; los del Poyo no.
+- Las estaciones AEMET salen "dato antiguo" pasados **120 min** (límite configurable en `engine/sources.yaml`; el SAIH, 60).

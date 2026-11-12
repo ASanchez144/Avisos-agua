@@ -22,21 +22,25 @@ Aviso permanente del proyecto (obligatorio en la UI y presente en todas las resp
 - **Carga sobre el servidor:** 1 petición cada 15 minutos (el dato cambia cada 5), User-Agent `HidroRed/0.1 (radar ciudadano hidrologico no oficial; scraping responsable)`.
 - **Pendiente:** el endpoint es interno del visor, no una API pública documentada. Recomendado escribir a `atencion.ciudadana@chcantabrico.es` informando del uso (el propio aviso legal da esa dirección para dudas).
 
-### ACA — Agència Catalana de l'Aigua (conector `aca`)
+### ACA — Agència Catalana de l'Aigua (conector `aca`) — ⚠️ RIESGO LEGAL (parcial)
 
-- **Recursos:** `GET https://aplicacions.aca.gencat.cat/sdim2/apirest/catalog?componentType=...` y `.../data/...` (4 peticiones cada 15 min).
-- **robots.txt:** `https://aplicacions.aca.gencat.cat/robots.txt` devuelve 404 (sin restricciones declaradas).
-- **Términos:** **NO VERIFICADO.** No se encontró página de condiciones de la API SDIM2. El dataset equivalente de datos abiertos declara "See Terms of Use" y atribución "Agència Catalana de l'Aigua (ACA)". Citar siempre a la ACA y **confirmar las condiciones antes de publicar**.
+- **Recursos:** `GET https://aplicacions.aca.gencat.cat/sdim2/apirest/catalog?componentType=...` y `.../data/...` (4 peticiones cada 15 min). `robots.txt` → 404 (sin restricciones declaradas).
+- **Lo verificado (2026-11-12):** el conjunto de datos abiertos equivalente (`gn9e-3qhr`, embalses) declara `license: SEE_TERMS_OF_USE` y atribución "Agència Catalana de l'Aigua (ACA)", con enlace a las licencias: https://web.gencat.cat/ca/generalitat/dades-indicadors/dades-obertes/llicencies — **Llicència oberta d'ús d'informació - Catalunya**. Permite reutilizar, distribuir, comunicar públicamente y transformar, con estas condiciones (cita literal): "No es pot alterar el contingut de la informació. No es pot desnaturalitzar el sentit de la informació. Cal citar la font de la informació de la manera següent: Generalitat de Catalunya. Departament de [nom departament]. [organisme autònom, empresa pública]... S'ha d'informar de la darrera data d'actualització de la informació." La propia licencia añade que una licencia específica de un conjunto de datos prevalece.
+- **Lo NO verificado:** esa licencia está atada al dataset de datos abiertos. **No he encontrado ninguna página de condiciones para la API SDIM2** que usa el conector ni para el visor `aetr.aca.gencat.cat`. Es probable que apliquen las mismas condiciones, pero **no está escrito**: por eso **RIESGO LEGAL** hasta que la ACA lo confirme.
+- **Cómo cumplimos lo que sí sabemos:** se cita "Generalitat de Catalunya. Departament de Territori, Habitatge i Transició Ecològica. Agència Catalana de l'Aigua"; se muestra la hora de la última lectura en cada dato; no se altera el contenido. El único cambio es de **unidad** (cm → m en el nivel), que no cambia el sentido de la información: confirmar que la ACA lo ve igual.
+- **Acción recomendada:** pedir por escrito a la ACA que confirme que la API SDIM2 se rige por esa licencia, antes de publicar.
 
-### AEMET OpenData (conector `aemet`)
+### AEMET OpenData (conector `aemet`) — verificado
 
-- **Recursos:** observación convencional, avisos CAP e inventario, con API key personal (`AEMET_API_KEY`, nunca en el repositorio).
-- **Términos (texto real de los metadatos de la API):** "© AEMET. Autorizado el uso de la información y su reproducción citando a AEMET como autora de la misma." Nota legal: https://www.aemet.es/es/nota_legal
-- **Obligación:** citar "Fuente: AEMET". Límite de peticiones de la API: NO VERIFICADO.
+- **Recursos:** observación convencional, avisos CAP e inventario, con API key personal (`AEMET_API_KEY`, solo en variables de entorno / GitHub Secrets).
+- **Términos (https://www.aemet.es/es/nota_legal, sección "Uso y reutilización", 2026-11-12):** reutilización autorizada al amparo de la Ley 18/2015 y el RD 1495/2011, con cesión gratuita y no exclusiva de los derechos para reproducir, distribuir, comunicar y transformar. Condiciones generales (cita): "1. Está prohibido desnaturalizar el sentido de la información. 2. Se debe citar a AEMET como fuente de la información objeto de la reutilización..." Los metadatos de la API repiten: "© AEMET. Autorizado el uso de la información y su reproducción citando a AEMET como autora de la misma."
+- **Obligación:** citar "Fuente: AEMET" junto a lluvia y avisos (la UI lo hace).
+- **Límite de peticiones de la API:** NO VERIFICADO (la página de condiciones de OpenData devolvió 404; `opendata.aemet.es/robots.txt` → 404). Se hacen 6 peticiones cada 15 min.
+- **Aviso:** estas predicciones y datos no son un servicio de emergencia; la nota legal de AEMET lo explica en su sección de responsabilidad.
 
 ### Otros datos y servicios usados
 
-- **Mapa base:** teselas de OpenStreetMap (© colaboradores de OpenStreetMap, ODbL), con atribución visible en el mapa. Su política de uso de teselas no admite uso intensivo: para producción hay que usar un proveedor propio o contratado.
+- **Mapa base (RIESGO LEGAL para producción):** teselas de OpenStreetMap (© colaboradores de OpenStreetMap, ODbL), con atribución visible en el mapa. Su política de uso de teselas no admite uso intensivo: para producción hay que usar un proveedor propio o contratado.
 - **Coordenadas y cotas de `engine/river_links.yaml`:** FeatureServer SAIH de MITECO (licencia NO VERIFICADA; campo `licenseInfo` vacío).
 - **Episodio histórico de test** (`tests/fixtures/historical/`): hidrograma de la Rambla del Poyo del 29/10/2024, del repositorio público `datadista/datasets` (licencia AGPL-3.0), datos originales del SAIH de la CHJ. Solo se usa en tests.
 
@@ -44,7 +48,6 @@ Aviso permanente del proyecto (obligatorio en la UI y presente en todas las resp
 
 | Fuente | Términos leídos | Estado |
 |---|---|---|
-| ACA — dataset `gn9e-3qhr` | Metadato `license: SEE_TERMS_OF_USE`; atribución "Agència Catalana de l'Aigua (ACA)" | Texto de las condiciones NO VERIFICADO |
 | DGT — NAP DATEX II | El catálogo del NAP devolvió 403 a la API | **NO VERIFICADO**; confirmar antes de mostrar imágenes de cámaras |
 | Hidrosur | "Los contenidos del sitio web [...] son propiedad de la empresa o de terceros con licencia"; datos "no están verificados [...] carecen de valor oficial" | **Sin permiso expreso de reutilización → pedir autorización** |
 | SAIH Guadalquivir | "Salvo que se indique lo contrario, la reproducción queda autorizada siempre que se cite su origen." | Reutilizable citando origen |
