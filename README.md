@@ -13,7 +13,9 @@ Radar ciudadano de caudales, embalses y lluvia en España con datos públicos.
 | `backend/` | API FastAPI, SQLite, planificador cada 15 min, modo demostración. |
 | `frontend/` | React + Tailwind + Lucide + Leaflet, modo oscuro, móvil primero. |
 | `tests/` | Tests, fixtures reales, referencias oficiales y arnés de verificación inmutable. |
-| `docs/` | `SOURCES_REPORT.md`, `LEGAL.md`, `OMITTED_SOURCES.md`, capturas. |
+| `collector/` | `python -m collector.run_once`: un ciclo y termina (GitHub Actions). |
+| `api/` | Función serverless de Vercel (API de solo lectura). |
+| `docs/` | `SOURCES_REPORT.md`, `LEGAL.md`, `OMITTED_SOURCES.md`, `CALIBRATION.md`, `CAMERAS.md`, `DEPLOY.md`, capturas. |
 
 ## Puesta en marcha con Docker (un comando)
 
@@ -35,10 +37,32 @@ docker compose up --build
 
 Para ver la interfaz con datos de ejemplo (sin consultar ninguna fuente), pon `DEMO_LIVE_FALLBACK=true` en `.env`. Cada pantalla lleva la etiqueta **DATOS DE DEMOSTRACIÓN**.
 
+## Despliegue gratuito (Neon + GitHub Actions + Vercel)
+
+Ver [`docs/DEPLOY.md`](docs/DEPLOY.md). El colector corre en GitHub Actions cada 15 min, la web y la API en Vercel, y los datos en Neon.
+
+## Fuentes que esperan muestras (Ebro, Júcar, Duero, Miño-Sil…)
+
+Varias fuentes no se pudieron probar desde el entorno de desarrollo. **Ejecuta esto en tu PC (IP española):**
+
+```bash
+pip install requests
+```
+
+```bash
+python scripts/probe_sources.py
+```
+
+(o solo algunas: `python scripts/probe_sources.py saih_ebro saih_jucar`). Cada respuesta real se guarda en `tests/fixtures/<fuente>/` con su URL y fecha, y se escribe `probe_report.json`. Respeta `robots.txt`, pide cada URL una vez y no insiste si te rechazan.
+
+Para devolverme las muestras: comprime `tests/fixtures/` y `probe_report.json` (sin claves: el script no usa ninguna) y súbelos al repositorio en una rama o pásamelos. Con ellas se escriben los conectores de Ebro y Júcar con TDD; hasta entonces `tests/test_pending_connectors.py` los deja en espera.
+
+Para medir la longitud de un cauce con OpenStreetMap: `python scripts/measure_channel.py "Rambla del Poyo" --bbox 39.30,-0.95,39.55,-0.35`.
+
 ## Desarrollo sin Docker
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 ```bash
@@ -53,16 +77,19 @@ cd frontend && npm install && npm run dev
 
 `GET /stations` · `GET /stations/{id}` · `GET /stations/{id}/history?limit=100` · `GET /alerts` · `GET /propagation`
 
+`GET /stations/{id}/camera` (cámara verificada cercana, solo para ver) y `GET /cameras/{id}/status`.
+
 Todas las respuestas llevan `disclaimer` y `demo` (`true` solo en modo demostración).
 
 ## Reglas que el código garantiza
 
-- **Estados:** `NORMAL`, `VIGILANCIA`, `PREALERTA`, `ALERTA`, `SIN_DATOS`, `DATO_OBSOLETO` (más de 60 min sin lectura nueva).
+- **Estados:** `NORMAL`, `VIGILANCIA`, `PREALERTA`, `ALERTA`, `SIN_UMBRAL` (hay dato pero la fuente no publica umbral), `SIN_DATOS`, `DATO_OBSOLETO` (más de 60 min sin lectura nueva; 120 en AEMET, configurable en `engine/sources.yaml`).
 - Si la última ejecución de una fuente falló, sus estaciones salen `SIN_DATOS`.
 - Sin umbral oficial no hay semáforo: `status: null` y "umbral no publicado".
 - Un valor fuera de rango no se corrige ni se recorta: `quality: "SUSPECT"` y fuera de alertas.
-- La propagación da siempre un **rango** de horas con la etiqueta "estimación orientativa"; distancias y velocidades no verificadas van marcadas `ESTIMADA`.
-- Scraping responsable: User-Agent identificable, robots.txt, 1 petición por recurso cada 15 min.
+- La propagación da siempre un **rango** de horas con la etiqueta "estimación orientativa" y solo si hay distancia y velocidad con fuente; en ramblas sin referencia solo avisa de "subida detectada en cabecera". La distancia en línea recta es cota inferior (el ETA puede ser menor que el real). Disparador en 2 niveles, con 2 lecturas consecutivas (`docs/CALIBRATION.md`).
+- Cámaras solo para ver, sin análisis: se muestra la imagen si está al día; si no, "Cámara sin señal".
+- Scraping responsable: User-Agent identificable, robots.txt, 1 petición por recurso cada 15 min (guardado en la base de datos: sobrevive a reinicios).
 
 ## Tests
 

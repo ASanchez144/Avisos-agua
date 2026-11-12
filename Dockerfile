@@ -5,6 +5,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend ./backend
 COPY connectors ./connectors
 COPY engine ./engine
+COPY collector ./collector
+COPY migrations ./migrations
+COPY alembic.ini ./alembic.ini
 ENV HIDRORED_DB=/app/data/hidrored.sqlite
 EXPOSE 8000
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

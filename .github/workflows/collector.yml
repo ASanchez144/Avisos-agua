@@ -1,0 +1,33 @@
+name: collector
+# Un ciclo de recogida cada 15 min. Gratis en repositorios públicos.
+# GitHub puede retrasar los cron unos minutos; el límite de 1 petición/15 min por recurso
+# se guarda en la base de datos, así que un ciclo adelantado no castiga a las fuentes.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: collector
+  cancel-in-progress: false
+
+jobs:
+  run-once:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Un ciclo (un fallo de un conector no aborta el ciclo)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AEMET_API_KEY: ${{ secrets.AEMET_API_KEY }}
+        run: python -m collector.run_once

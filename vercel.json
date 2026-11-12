@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd frontend && npm ci && npm run build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "echo 'instalación en buildCommand'",
+  "rewrites": [{ "source": "/api/(.*)", "destination": "/api/index" }],
+  "functions": { "api/index.py": { "maxDuration": 30 } },
+  "headers": [
+    {
+      "source": "/api/(stations|alerts|propagation)(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=60, stale-while-revalidate=120" }]
+    },
+    {
+      "source": "/api/stations/(.*)/camera",
+      "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=120" }]
+    }
+  ]
+}
