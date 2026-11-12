@@ -1,4 +1,15 @@
-# Cámaras de tráfico (DGT) — solo para ver
+# Cámaras — solo para ver
+
+## 1. Cámaras oficiales del SAI Cantábrico (EN USO) — enfocan el río
+
+La Confederación Hidrográfica del Cantábrico tiene **147 cámaras en sus estaciones de aforo**, apuntando al cauce y a la regla de nivel (revisado a ojo: 1424 Eo en Ribera de Piquín, 1383 Narcea). Verificado el 2026-11-12:
+
+- Lista: `POST https://visor.saichcantabrico.es/wp-admin/admin-ajax.php` con `action=peticion_cincominutal&tipo=camaras` → GeoJSON (147).
+- Última foto: mismo endpoint con `action=get_camera_image&code=<código>` → `{"url": ".../meteorologia-files/camaras/<CARPETA>/AAAAMMDDHHMM.jpg", "fecha": ISO}`.
+- Se renuevan cada 10-60 min según la estación. Algunas llevan meses sin foto (p. ej. 1414 Porcía, julio): salen como **"Cámara sin señal"**.
+- La app pide la URL como mucho 1 vez cada 15 min por cámara (caché en la base de datos) y el navegador carga la foto directamente del visor de la CHC (hotlink, con cita y enlace al origen). `robots.txt` permite `admin-ajax.php`; el aviso legal permite reutilizar citando la fuente y prohíbe el *framing* (no se hace).
+
+## 2. Cámaras de tráfico (DGT)
 
 **No hay análisis de imagen de ningún tipo** (ni visión artificial, ni IA, ni APIs de pago): la imagen se enseña tal cual y se enlaza al origen.
 
