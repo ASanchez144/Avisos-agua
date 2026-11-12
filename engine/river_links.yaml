@@ -1,0 +1,102 @@
+# Relaciones cabecera -> valle para el motor de propagación (engine/propagation.py).
+#
+# DISTANCIAS: ninguna está medida sobre el cauce. Todas van marcadas ESTIMADA y la UI
+# debe mostrarlo. Dos tipos:
+#   - Sin `distance_km`: el motor la calcula como poligonal en línea recta entre las
+#     coordenadas indicadas (origen, puntos intermedios, destino). Es una COTA INFERIOR:
+#     el cauce real es más largo, así que la llegada real será algo más tardía.
+#   - Con `distance_km`: cifra del proyecto sin fuente verificada (se dice en la fuente).
+#
+# COORDENADAS Y COTAS (verificadas con petición real el 2026-11-11):
+#   MITECO-ROEA = FeatureServer SAIH de MITECO, capa 1 "Red Integrada de Estaciones de Aforos (SAIH-ROEA)".
+#   MITECO-SAIH = mismo servicio, capa 5 "Estaciones de Aforo en río SAIH (Caudal)".
+#   SAI-CHC     = visor oficial del SAI Cantábrico.
+
+triggers:
+  rain_mm_h: 20.0            # lluvia en cabecera (mm en 1 h)
+  flow_rise_pct_1h: 30.0     # subida de caudal en 1 h (%)
+  min_flow_m3s: 1.0          # caudal mínimo para considerar una subida (evita ruido en cauces casi secos). Parámetro del proyecto.
+  max_age_minutes: 120       # antigüedad máxima del dato que dispara (AEMET publica el acumulado horario con ~1 h de retraso)
+  hour_tolerance_minutes: 15 # margen para encontrar la lectura de "hace 1 h"
+
+regimes:
+  rio:
+    speed_kmh_min: 6.0
+    speed_kmh_max: 14.0
+    status: ESTIMADA
+    source: >-
+      Rango 6-14 km/h fijado en la especificación del proyecto para la velocidad de la onda de
+      crecida según la pendiente. No está contrastado con medidas de cada tramo: se usa el rango
+      completo y por eso la llegada se da siempre como intervalo.
+  rambla:
+    speed_kmh_min: 10.0
+    speed_kmh_max: 20.0
+    status: ESTIMADA
+    source: >-
+      Supuesto del proyecto SIN fuente verificada: barrancos y ramblas mediterráneos (cauce seco,
+      más pendiente) responden mucho más rápido que un río. Pendiente de contrastar con la CHJ o
+      el CEDEX. El episodio real del 29/10/2024 (un solo aforo) no permite medir la velocidad.
+
+links:
+  - id: aragon-jaca-yesa
+    river: Aragón
+    regime: rio
+    origin: {station_id: "saih_ebro:A018", name: "Aragón en Jaca", lat: 42.57849, lon: -0.55427, elevation_m: 793, coord_source: "MITECO-ROEA 9018"}
+    via:
+      - {name: "Aragón en Martes", lat: 42.59149, lon: -0.88288, coord_source: "MITECO-ROEA 9282"}
+      - {name: "Aragón en Yesa C.E.", lat: 42.6097, lon: -0.99869, coord_source: "MITECO-ROEA 9170"}
+    destination: {station_id: "saih_ebro:A101", name: "Aragón a pie de presa de Yesa", lat: 42.61594, lon: -1.21105, elevation_m: 423, coord_source: "MITECO-ROEA 9101"}
+    rain_station_id: "aemet:9201X"   # AEMET "JACA", a 0,8 km del aforo (enlace por coordenadas)
+    note: "Sin datos en vivo de caudal: el SAIH Ebro no era accesible al verificar las fuentes. Puede disparar por lluvia en la estación AEMET de Jaca."
+
+  - id: aragon-yesa-caparroso
+    river: Aragón
+    regime: rio
+    origin: {station_id: "saih_ebro:A101", name: "Aragón a pie de presa de Yesa", lat: 42.61594, lon: -1.21105, elevation_m: 423, coord_source: "MITECO-ROEA 9101"}
+    destination: {station_id: "saih_ebro:A005", name: "Aragón en Caparroso", lat: 42.34363, lon: -1.65106, elevation_m: 302.3, coord_source: "MITECO-ROEA 9005"}
+    note: "El embalse de Yesa está entre medias: puede retener o laminar la crecida, y esta estimación no lo tiene en cuenta."
+
+  - id: aragon-caparroso-ebro-zaragoza
+    river: Aragón / Ebro
+    regime: rio
+    origin: {station_id: "saih_ebro:A005", name: "Aragón en Caparroso", lat: 42.34363, lon: -1.65106, elevation_m: 302.3, coord_source: "MITECO-ROEA 9005"}
+    via:
+      - {name: "Aragón en Milagro", lat: 42.24782, lon: -1.76181, coord_source: "MITECO-ROEA 9054"}
+    destination: {station_id: "saih_ebro:A011", name: "Ebro en Zaragoza", lat: 41.65857, lon: -0.88106, elevation_m: 200.6, coord_source: "MITECO-ROEA 9011"}
+    note: "Tramo largo y con meandros: la poligonal subestima mucho la distancia real."
+
+  - id: poyo-chiva-aforo
+    river: Barranco del Poyo
+    regime: rambla
+    origin: {station_id: null, name: "Barranco del Poyo, cabecera (Chiva)", lat: null, lon: null, coord_source: "sin coordenadas verificadas"}
+    destination: {station_id: "saih_jucar:rambla_poyo", name: "Aforo de la Rambla del Poyo", lat: 39.47537, lon: -0.5818, coord_source: "MITECO-SAIH 'AFORO RAMBLA POYO'"}
+    distance_km: 16.0
+    distance_source: >-
+      Cifra del proyecto SIN fuente verificada (Chiva -> aforo). Único dato contrastado: el cauce
+      completo mide 43,5 km según el CEDEX (citado por Wikipedia), que es la cota superior.
+    note: "Sin estación en cabecera ni datos en vivo (SAIH Júcar rechaza el acceso automatizado): hoy este enlace no puede dispararse."
+
+  - id: poyo-aforo-paiporta
+    river: Rambla del Poyo
+    regime: rambla
+    origin: {station_id: "saih_jucar:rambla_poyo", name: "Aforo de la Rambla del Poyo", lat: 39.47537, lon: -0.5818, coord_source: "MITECO-SAIH 'AFORO RAMBLA POYO'"}
+    destination: {station_id: null, name: "Paiporta (núcleo urbano)", lat: null, lon: null, coord_source: "sin coordenadas verificadas"}
+    distance_km: 14.0
+    distance_source: >-
+      Cifra del proyecto SIN fuente verificada (aforo -> Paiporta). Cota superior contrastada:
+      43,5 km de longitud total del cauce según el CEDEX (citado por Wikipedia).
+    note: "Sin datos en vivo (SAIH Júcar rechaza el acceso automatizado). Probado con el hidrograma real del 29/10/2024."
+
+  - id: eo-ribera-pontenova
+    river: Eo
+    regime: rio
+    origin: {station_id: "saih_cantabrico:1424", name: "Eo en Ribera de Piquín", lat: 43.17949624557935, lon: -7.199463048291921, coord_source: "SAI-CHC"}
+    destination: {station_id: "saih_cantabrico:1426", name: "Eo en A Pontenova", lat: 43.35593289059789, lon: -7.189386036334844, coord_source: "SAI-CHC"}
+    note: "Enlace con datos en vivo (SAI Cantábrico)."
+
+  - id: eo-pontenova-santirso
+    river: Eo
+    regime: rio
+    origin: {station_id: "saih_cantabrico:1426", name: "Eo en A Pontenova", lat: 43.35593289059789, lon: -7.189386036334844, coord_source: "SAI-CHC"}
+    destination: {station_id: "saih_cantabrico:1427", name: "Eo en San Tirso de Abres", lat: 43.41365602728764, lon: -7.143636466574093, coord_source: "SAI-CHC"}
+    note: "Enlace con datos en vivo (SAI Cantábrico)."
