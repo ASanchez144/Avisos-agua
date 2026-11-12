@@ -1,0 +1,9 @@
+{
+  "unidad_generadora": "Grupos Funcionales de Fenómenos Adversos",
+  "descripción": "Fenómenos meteorológicos adversos observados y/o previstos, desde hoy hasta pasado mañana, de cada parámetro meteorológico por nivel de aviso, para cada zona meteorológica definida en el Plan Meteoalerta",
+  "periodicidad": "Disponible en cualquier momento en el que se emite un fenómeno meteorológico adverso, con horas preferentes de emisión: 09:00, 11:30, 23:00 y 23:50 h.o.p. Datos desde el 18/06/2018",
+  "formato": "application/x-gtar (contiene ficheros CAP v1.2)",
+  "copyright": "© AEMET. Autorizado el uso de la información y su reproducción citando a AEMET como autora de la misma.",
+  "notaLegal": "https://www.aemet.es/es/nota_legal",
+  "campos": "Anexo 3 del Plan Meteoalerta (https://www.aemet.es/documentos/es/eltiempo/prediccion/avisos/plan_meteoalerta/plan_meteoalerta.pdf)"
+}

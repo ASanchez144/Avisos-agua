@@ -1,0 +1,14 @@
+HTTP/1.1 200 Connection Established
+
+HTTP/1.1 401 Unauthorized
+Date: Wed, 11 Nov 2026 11:43:52 GMT
+X-OneAgent-JS-Injection: true
+Vary: Origin,Access-Control-Request-Method,Access-Control-Request-Headers
+Content-Length: 104
+Cache-Control: no-store, no-cache, must-revalidate
+Pragma: no-cache
+Expires: 0
+Server-Timing: dtSInfo;desc="0", dtRpid;desc="1107540673"
+Connection: close
+Content-Type: text/plain; charset=UTF-8
+

@@ -1,0 +1,10 @@
+{
+    "response": {
+        "ok": 1,
+        "urlmenu": "index.php?w=get-menu&x=31sNtkHGKWwvHBVLKpG6QKdcqzIaUIf8Ji5l0i%2Bl%2BcRezpZSjE7XjStQXRRMw%2B31",
+        "default_template": "#tmpl-home",
+        "default_url": "home",
+        "default_target": "#home",
+        "mantenimiento": false
+    }
+}

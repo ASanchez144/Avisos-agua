@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert xmlns = "urn:oasis:names:tc:emergency:cap:1.2">
+  <identifier>2.49.0.0.724.0.ES.20261111102936.633302PRP213021794392976</identifier>
+  <sender>http://www.aemet.es</sender>
+  <sent>2026-11-11T10:29:36-00:00</sent>
+  <status>Actual</status>
+  <msgType>Alert</msgType>
+  <scope>Public</scope>
+  <info>
+    <language>es-ES</language>
+    <category>Met</category>
+    <event>Aviso de lluvias de nivel amarillo</event>
+    <responseType>Monitor</responseType>
+    <urgency>Future</urgency>
+    <severity>Moderate</severity>
+    <certainty>Likely</certainty>
+    <eventCode>
+      <valueName>AEMET-Meteoalerta fenomeno</valueName>
+      <value>PR;Lluvias</value>
+    </eventCode>
+    <effective>2026-11-11T11:29:36+01:00</effective>
+    <onset>2026-11-13T00:00:00+01:00</onset>
+    <expires>2026-11-13T02:59:59+01:00</expires>
+    <senderName>AEMET. Agencia Estatal de Meteorología</senderName>
+    <headline>Aviso de lluvias de nivel amarillo. Litoral oriental asturiano</headline>
+    <description>Precipitación acumulada en 12 horas: 40 mm.</description>
+    <instruction>Esté atento. Manténgase informado de la predicción meteorológica más actualizada. Se pueden producir daños moderados a personas y bienes, especialmente a aquellos vulnerables o en zonas expuestas al fenómeno.</instruction>
+    <web>https://www.aemet.es/es/eltiempo/prediccion/avisos</web>
+    <contact>AEMET</contact>
+    <parameter>
+      <valueName>AEMET-Meteoalerta nivel</valueName>
+      <value>amarillo</value>
+    </parameter>
+    <parameter>
+      <valueName>AEMET-Meteoalerta parametro</valueName>
+      <value>P2;Precipitación acumulada en 12 horas;40 mm</value>
+    </parameter>
+    <parameter>
+      <valueName>AEMET-Meteoalerta probabilidad</valueName>
+      <value>40%-70%</value>
+    </parameter>
+    <area>
+      <areaDesc>Litoral oriental asturiano</areaDesc>
+      <polygon>43.59,-5.94 43.62,-5.9 43.63,-5.9 43.64,-5.82 43.61,-5.78 43.59,-5.76 43.57,-5.71 43.54,-5.68 43.56,-5.41 43.54,-5.38 43.54,-5.29 43.47,-5.21 43.49,-5.12 43.46,-5.04 43.46,-4.94 43.42,-4.74 43.39,-4.58 43.39,-4.51 43.34,-4.54 43.35,-4.62 43.37,-4.71 43.36,-4.82 43.35,-4.93 43.38,-5.01 43.41,-5.03 43.42,-5.08 43.43,-5.15 43.44,-5.18 43.43,-5.26 43.41,-5.28 43.43,-5.34 43.41,-5.36 43.44,-5.41 43.41,-5.45 43.43,-5.56 43.44,-5.58 43.46,-5.64 43.45,-5.75 43.49,-5.82 43.53,-5.86 43.55,-5.85 43.59,-5.91 43.59,-5.94</polygon>
+      <geocode>
+        <valueName>AEMET-Meteoalerta zona</valueName>
+        <value>633302</value>
+      </geocode>
+    </area>
+  </info>
+  <info>
+    <language>en-GB</language>
+    <category>Met</category>
+    <event>Moderate rain warning</event>
+    <responseType>Monitor</responseType>
+    <urgency>Future</urgency>
+    <severity>Moderate</severity>
+    <certainty>Likely</certainty>
+    <eventCode>
+      <valueName>AEMET-Meteoalerta fenomeno</valueName>
+      <value>PR;Lluvias</value>
+    </eventCode>
+    <effective>2026-11-11T11:29:36+01:00</effective>
+    <onset>2026-11-13T00:00:00+01:00</onset>
+    <expires>2026-11-13T02:59:59+01:00</expires>
+    <senderName>AEMET. State Meteorological Agency</senderName>
+    <headline>Moderate rain warning. Litoral oriental asturiano</headline>
+    <description>Twelve-hours accumulated precipitation: 40 mm.</description>
+    <instruction>Be aware, keep up to date with the latest weather forecast. Moderate damages to people and properties may occur, especially to those vulnerable or in exposed areas.</instruction>
+    <web>https://www.aemet.es/en/eltiempo/prediccion/avisos</web>
+    <contact>AEMET</contact>
+    <parameter>
+      <valueName>AEMET-Meteoalerta nivel</valueName>
+      <value>amarillo</value>
+    </parameter>
+    <parameter>
+      <valueName>AEMET-Meteoalerta parametro</valueName>
+      <value>P2;Twelve-hours accumulated precipitation;40 mm</value>
+    </parameter>
+    <parameter>
+      <valueName>AEMET-Meteoalerta probabilidad</valueName>
+      <value>40%-70%</value>
+    </parameter>
+    <area>
+      <areaDesc>Litoral oriental asturiano</areaDesc>
+      <polygon>43.59,-5.94 43.62,-5.9 43.63,-5.9 43.64,-5.82 43.61,-5.78 43.59,-5.76 43.57,-5.71 43.54,-5.68 43.56,-5.41 43.54,-5.38 43.54,-5.29 43.47,-5.21 43.49,-5.12 43.46,-5.04 43.46,-4.94 43.42,-4.74 43.39,-4.58 43.39,-4.51 43.34,-4.54 43.35,-4.62 43.37,-4.71 43.36,-4.82 43.35,-4.93 43.38,-5.01 43.41,-5.03 43.42,-5.08 43.43,-5.15 43.44,-5.18 43.43,-5.26 43.41,-5.28 43.43,-5.34 43.41,-5.36 43.44,-5.41 43.41,-5.45 43.43,-5.56 43.44,-5.58 43.46,-5.64 43.45,-5.75 43.49,-5.82 43.53,-5.86 43.55,-5.85 43.59,-5.91 43.59,-5.94</polygon>
+      <geocode>
+        <valueName>AEMET-Meteoalerta zona</valueName>
+        <value>633302</value>
+      </geocode>
+    </area>
+  </info>
+</alert>

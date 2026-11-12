@@ -1,0 +1,253 @@
+{
+    "response": {
+        "home": {
+            "link": "home",
+            "callback": "cambiapagina",
+            "tmpl": "#tmpl-home",
+            "target": "#home",
+            "class": "acc-ajax"
+        },
+        "items": [
+            {
+                "name": "Datos en tiempo real",
+                "link": "index.php?w=get-datos-tiempo-real&x=%2FikP2Tzu5snbTbvdgFM6UBqHmq4XqYnUjMNmf%2FZ%2BcxytLxdXhEUIgufdeYfkY30bGY9p9IIaEdkTkHwFKcMblYBfyXvu4LTUiTS6v5SaAo4%3D",
+                "callback": "cambiapagina",
+                "tmpl": "#tmpl-datos-tiempo-real",
+                "target": "#datos-tiempo-real",
+                "class": "acc-ajax",
+                "items2": [
+                    {
+                        "name": "SAIH",
+                        "link": "index.php?w=get-datos-tiempo-real&x=%2FikP2Tzu5snbTbvdgFM6UPHznWfZJNqv%2F%2FhtQaodWeflPJwWWsRHuVpgR03RUOnTpR6USKPaIvrYD9%2F2F%2FurC8vKh6HUSmv2ovdNNOYJIEG4UDPsJiVV19Dt2kVF0PUj",
+                        "callback": "cambiapagina",
+                        "tmpl": "#tmpl-datos-tiempo-real",
+                        "target": "#datos-tiempo-real",
+                        "class": "acc-ajax"
+                    },
+                    {
+                        "name": "SAICA",
+                        "link": "index.php?w=get-datos-tiempo-real&x=%2FikP2Tzu5snbTbvdgFM6UPHznWfZJNqv%2F%2FhtQaodWed9MOiOUMSrxG3IfBAf8XkShYmEufaflrhH5rVxmTy%2B5MySySeMsbGEXfsf9VvEDoyiS3wMAWIqrRLZHnPb80FO",
+                        "callback": "cambiapagina",
+                        "tmpl": "#tmpl-datos-tiempo-real",
+                        "target": "#datos-tiempo-real",
+                        "class": "acc-ajax"
+                    }
+                ]
+            },
+            {
+                "name": "Pluviometr\u00eda",
+                "link": "index.php?w=get-pluviometria&x=osLFYnftvll2pF2Gxrqiz1XUSSMAueDK%2B0MeRJHcSlHZ%2B8Ij7xHxQRff7I%2BtsEdaW2ZPJW0yVoN44wQSfbmuwQ%3D%3D",
+                "callback": "cambiapagina",
+                "tmpl": "#tmpl-pluviometria",
+                "target": "#pluviometria",
+                "class": "acc-ajax",
+                "items2": [
+                    {
+                        "name": "Tiempo real",
+                        "link": "index.php?w=get-pluviometria&x=osLFYnftvll2pF2Gxrqiz1XUSSMAueDK%2B0MeRJHcSlHZ%2B8Ij7xHxQRff7I%2BtsEdaW2ZPJW0yVoN44wQSfbmuwQ%3D%3D",
+                        "callback": "cambiapagina",
+                        "tmpl": "#tmpl-pluviometria",
+                        "target": "#pluviometria",
+                        "class": "acc-ajax"
+                    },
+                    {
+                        "name": "Mapas est\u00e1ticos",
+                        "link": "index.php?w=get-pluviometria-estaticos&x=osLFYnftvll2pF2Gxrqiz29jA81gFQvWNVWg1UdVUHWvf3Cni5Tq1HF6G7eJ7dJ7ikY2Tm87hedxrjNv%2BSwVEVX4hqW9gd5%2BYTOvoGcwoW8%3D",
+                        "callback": "cambiapagina",
+                        "tmpl": "#tmpl-pluviometria-estaticos",
+                        "target": "#pluviometria-estaticos",
+                        "class": "acc-ajax"
+                    },
+                    {
+                        "name": "Mapas animados",
+                        "link": "index.php?w=get-pluviometria-animados&x=osLFYnftvll2pF2Gxrqiz8wBWD%2FIVAAopfgHMz6lO1%2BKIlxvhdUWxPaXpMTc5EyBYVt53nVeAGNFJfryzk3R9en1uiQO8O9xObM2ie1HLzY%3D",
+                        "callback": "cambiapagina",
+                        "tmpl": "#tmpl-pluviometria-animados",
+                        "target": "#pluviometria-animados",
+                        "class": "acc-ajax"
+                    },
+                    {
+                        "name": "Radar",
+                        "link": "index.php?w=get-meteorologia&x=Tq%2Fw%2Bc3IXbjEGnnioDQo487xlrJUC91uIjLgOlQZRCqzNmHg8BvgvHqhupJugjv4USqqXpK%2FfjneS%2Fiys3QGwoRIo4QUhgh5b7pLsKKIoTY%3D",
+                        "callback": "cambiapagina",
+                        "tmpl": "#tmpl-meteorologia",
+                        "target": "#meteorologia",
+                        "class": "acc-ajax"
+                    }
+                ]
+            },
+            {
+                "name": "Umbrales",
+                "link": "index.php?w=get-aforosenrio&x=rNqKxe6hty4sr4HZp9XVmoe063kXz645T1nN5hxLO0w4FKC%2F6Wmn4%2F8RslC5vmZCT5CS03tulPXFhb9erSbxHA%3D%3D",
+                "callback": "cambiapagina",
+                "tmpl": "#tmpl-aforosenrio",
+                "target": "#aforosenrio",
+                "class": "acc-ajax",
+                "items2": [
+                    {
+                        "name": "Aforos en r\u00edo",
+                        "link": "index.php?w=get-aforosenrio&x=rNqKxe6hty4sr4HZp9XVmoe063kXz645T1nN5hxLO0w4FKC%2F6Wmn4%2F8RslC5vmZCT5CS03tulPXFhb9erSbxHA%3D%3D",
+                        "callback": "cambiapagina",
+                        "tmpl": "#tmpl-aforosenrio",
+                        "target": "#aforosenrio",
+                        "class": "acc-ajax"
+                    },
+                    {
+                        "name": "Embalses",
+                        "link": "index.php?w=get-embalses&x=6JpzkjTQWNkOrV5tiYDGg9yJrm0S4LHfAbFJ0%2BLefGPnUGhtVafg8CQe0l7DRMrSJUKgHMt%2FllUCePWaLlCp%2Bg%3D%3D",
+                        "callback": "cambiapagina",
+                        "tmpl": "#tmpl-embalses",
+                        "target": "#embalses",
+                        "class": "acc-ajax"
+                    }
+                ]
+            },
+            {
+                "name": "Login",
+                "link": "login",
+                "callback": "",
+                "tmpl": "",
+                "target": "",
+                "class": "abrirlogin"
+            }
+        ],
+        "postlogin": "index.php?w=post-login&x=zgJfFVLtwVPtxJ7D51E5DBwsAe9IQY%2Fms8gzqaCZ0AxDOeG2Tk%2B1vS%2Bz96hb54WgHTbJl2HwcKq5C1ISXwTUsQ%3D%3D",
+        "textos": {
+            "LOGO_SAIH": "panel\/docs\/logo_saih-6.png",
+            "LOGO_ESPANA": "panel\/docs\/logo_espana-1.png"
+        }
+    },
+    "response2": {
+        "id": "cuenca",
+        "type": "leaflet",
+        "name": "Todo",
+        "label": "Todo",
+        "nombre_limpio": "",
+        "collapsed": "",
+        "group_name": "",
+        "children": [
+            {
+                "id": "",
+                "type": "leaflet",
+                "name": "SAIH",
+                "label": "SAIH",
+                "nombre_limpio": "",
+                "collapsed": "",
+                "group_name": "saih",
+                "children": [
+                    {
+                        "id": "",
+                        "type": "leaflet",
+                        "name": "Aforo en r\u00edo",
+                        "label": "Aforo en r\u00edo",
+                        "nombre_limpio": "aforo-en-rio",
+                        "collapsed": "",
+                        "group_name": "",
+                        "children": []
+                    },
+                    {
+                        "id": "",
+                        "type": "leaflet",
+                        "name": "Aforo en canal",
+                        "label": "Aforo en canal",
+                        "nombre_limpio": "aforo-en-canal",
+                        "collapsed": "",
+                        "group_name": "",
+                        "children": []
+                    },
+                    {
+                        "id": "",
+                        "type": "leaflet",
+                        "name": "Embalse",
+                        "label": "Embalse",
+                        "nombre_limpio": "embalse",
+                        "collapsed": "",
+                        "group_name": "",
+                        "children": []
+                    },
+                    {
+                        "id": "",
+                        "type": "leaflet",
+                        "name": "Impulsiones",
+                        "label": "Impulsiones",
+                        "nombre_limpio": "impulsiones-de-embalses-o-de-canal",
+                        "collapsed": "",
+                        "group_name": "",
+                        "children": []
+                    },
+                    {
+                        "id": "",
+                        "type": "leaflet",
+                        "name": "Niv\u00f3metro",
+                        "label": "Niv\u00f3metro",
+                        "nombre_limpio": "nivometro",
+                        "collapsed": "",
+                        "group_name": "",
+                        "children": []
+                    },
+                    {
+                        "id": "",
+                        "type": "leaflet",
+                        "name": "Pluvi\u00f3metro",
+                        "label": "Pluvi\u00f3metro",
+                        "nombre_limpio": "pluviometro",
+                        "collapsed": "",
+                        "group_name": "",
+                        "children": []
+                    },
+                    {
+                        "id": "",
+                        "type": "leaflet",
+                        "name": "Marco de control",
+                        "label": "Marco de control",
+                        "nombre_limpio": "marco-de-control",
+                        "collapsed": "",
+                        "group_name": "",
+                        "children": []
+                    },
+                    {
+                        "id": "",
+                        "type": "leaflet",
+                        "name": "Pluvioniv\u00f3metro",
+                        "label": "Pluvioniv\u00f3metro",
+                        "nombre_limpio": "pluvionivometro",
+                        "collapsed": "",
+                        "group_name": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "",
+                "type": "leaflet",
+                "name": "SAICA",
+                "label": "SAICA",
+                "nombre_limpio": "",
+                "collapsed": "",
+                "group_name": "saica",
+                "children": [
+                    {
+                        "id": "",
+                        "type": "leaflet",
+                        "name": "Estaci\u00f3n de calidad SAICA",
+                        "label": "Estaci\u00f3n de calidad SAICA",
+                        "nombre_limpio": "estacion-calidad-saica",
+                        "collapsed": "",
+                        "group_name": "",
+                        "children": []
+                    },
+                    {
+                        "id": "",
+                        "type": "leaflet",
+                        "name": "Vertidos",
+                        "label": "Vertidos",
+                        "nombre_limpio": "vertido",
+                        "collapsed": "",
+                        "group_name": "",
+                        "children": []
+                    }
+                ]
+            }
+        ]
+    }
+}

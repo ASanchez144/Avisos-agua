@@ -1,0 +1,7 @@
+# Evidencia de fallo de acceso (no hay respuesta real que guardar)
+fecha_utc: 2026-11-11T11:44:14Z
+url: https://www.saihduero.es/
+comando: curl -sS -m 40 -A 'HidroRed-Research/0.1' -o /dev/null -w '%{http_code} %{time_total}s' 'https://www.saihduero.es/'
+salida:
+curl: (56) CONNECT tunnel failed, response 502
+000 0.439052s

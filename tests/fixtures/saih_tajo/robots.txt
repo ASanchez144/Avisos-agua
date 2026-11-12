@@ -1,0 +1,14 @@
+User-agent: *
+
+Disallow: /politica-de-privacidad
+Disallow: /aviso-legal
+Disallow: /condiciones-de-contratacion
+Disallow: /politica-de-cookies
+Disallow: /favoritos
+Disallow: /registro
+
+Disallow: /*.php$
+
+Disallow: /?w=
+Disallow: /?e=
+Disallow: /?b=

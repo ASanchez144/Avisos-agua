@@ -1,0 +1,17 @@
+{
+ "source_url": "https://aetr.aca.gencat.cat/",
+ "user_agent": "HidroRed-Research/0.1 (proyecto ciudadano hidrologia; verificacion de fuentes)",
+ "captured_at_utc": "2026-11-11T12:16:00.818Z",
+ "files": [
+  "catalog_embassaments.json 16251",
+  "catalog_aforaments.json 118881",
+  "timeline_aca.sensor.capacity.json 339108",
+  "(omitido) smc.radar.rain_intensity_6min",
+  "(omitido) smc.radar.rain_accumulation_01h",
+  "(omitido) smc.radar_combined.river_warning",
+  "(omitido) smc.radar.river_warning",
+  "(omitido) smc.radar_combined.rain_accumulation_01h",
+  "(omitido) aca.sensor.rain_intensity_5min",
+  "timeline_aca.sensor.river_flow.json 1645317"
+ ]
+}

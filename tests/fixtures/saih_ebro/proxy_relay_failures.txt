@@ -1,0 +1,8 @@
+2026-11-11T11:33:50.090Z www.saihebro.com:443 ws_closed_mid_exchange | tunnel closed (code 1006) after 10s; 227 B sent, 39 B received, client reading, 0 B still queued in the relay
+2026-11-11T11:34:18.202Z www.saihebro.com:443 ws_closed_mid_exchange | tunnel closed (code 1006) after 10s; 517 B sent, 39 B received, client reading, 0 B still queued in the relay
+2026-11-11T11:34:28.557Z saihebro.com:443 ws_closed_mid_exchange | tunnel closed (code 1006) after 10s; 517 B sent, 39 B received, client reading, 0 B still queued in the relay
+2026-11-11T11:34:40.697Z www.saihebro.com:443 ws_closed_mid_exchange | tunnel closed (code 1006) after 10s; 517 B sent, 39 B received, client reading, 0 B still queued in the relay
+2026-11-11T11:37:48.413Z www.saihduero.es:443 connect_unreachable | gateway answered 502 to CONNECT (host allowed, but the gateway could not connect to it)
+2026-11-11T11:37:50.756Z saihduero.es:443 ws_closed_mid_exchange | tunnel closed (code 1006) after 2s; 517 B sent, 39 B received, client reading, 0 B still queued in the relay
+2026-11-11T11:44:13.669Z www.saihebro.com:443 ws_closed_mid_exchange | tunnel closed (code 1006) after 10s; 517 B sent, 39 B received, client reading, 0 B still queued in the relay
+2026-11-11T11:44:14.682Z www.saihduero.es:443 connect_unreachable | gateway answered 502 to CONNECT (host allowed, but the gateway could not connect to it)

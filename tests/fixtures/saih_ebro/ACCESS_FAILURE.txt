@@ -1,0 +1,7 @@
+# Evidencia de fallo de acceso (no hay respuesta real que guardar)
+fecha_utc: 2026-11-11T11:44:03Z
+url: https://www.saihebro.com/saihebro/index.php
+comando: curl -sS -m 40 -A 'HidroRed-Research/0.1' -o /dev/null -w '%{http_code} %{time_total}s' 'https://www.saihebro.com/saihebro/index.php'
+salida:
+curl: (35) Recv failure: Connection reset by peer
+000 10.331091s

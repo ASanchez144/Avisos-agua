@@ -1,0 +1,159 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="CSS/embalses.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css" href="../comunes/css/cupertino/jquery_ui_final.css"/>
+<script src="../comunes/js/jquery_final.js"></script>
+<script src="../comunes/js/jquery_ui_final.js"></script>
+<script language="javascript">
+	var tiposeleccionado = 0;
+	function recargar(){
+		parent.document.getElementById("iframe_izq").src="cauces3.php?tipo="+tiposeleccionado;	
+		document.location.reload();
+	}
+	function set_zona(zona){
+		if(zona=="0")
+			document.location="topo_cauces1.php?tipo="+tiposeleccionado;
+		else		
+			document.location="topo_cauces2.php?zona="+zona+"&tipo="+tiposeleccionado;
+	}
+
+	$(document).ready(function (){  
+		$(".draggable").draggable();
+
+		cauces(tiposeleccionado);
+	});
+	/*****************************************************************************************************************************************************/
+	/**	MUESTRA LOS CAUCES
+	/*****************************************************************************************************************************************************/
+	function cauces(tipo){
+
+		tiposeleccionado = tipo;
+
+		if (tipo == 0) {var imgmenu0 = "../comunes/imgVisor/b_caudales_cauces_on.png";} else{var imgmenu0 = "../comunes/imgVisor/b_caudales_cauces_off.png";}
+		if (tipo == 1) {var imgmenu1 = "../comunes/imgVisor/b_caudales_canales_on.png";} else{var imgmenu1 = "../comunes/imgVisor/b_caudales_canales_off.png";}
+		if (tipo == 2) {var imgmenu2 = "../comunes/imgVisor/b_caudales_acequias_on.png";} else{var imgmenu2 = "../comunes/imgVisor/b_caudales_acequias_off.png";}
+		if (tipo == 3) {var imgmenu3 = "../comunes/imgVisor/b_caudales_impulsiones_on.png";} else{var imgmenu3 = "../comunes/imgVisor/b_caudales_impulsiones_off.png";}
+		$("#img_0").attr("src",imgmenu0);
+		$("#img_1").attr("src",imgmenu1);
+		$("#img_2").attr("src",imgmenu2);
+		$("#img_3").attr("src",imgmenu3);
+
+		var fechaactual = "11-11-2026 12:40";
+		//var imgescala = "../comunes/imgVisor/visor_new_escala_volumenes.png";
+		var textopie = "Los colores de la leyenda se corresponden con la variable de Nivel en Cauces y no con umbrales de comunicación de avisos.<br>Caudales en m<sup>3</sup>/s | <span style='color: #ff0000'>\"-\" Caudal en desbordamiento, disponible dato de nivel</span>. Datos SAIH en tiempo real sin contrastar a <b>"+fechaactual+"</b><br>";
+		textopie += "<a href='javascript:recargar();'><img src='../comunes/imgVisor/b_actualizar.png' border='0'></a>";
+		var imgmapatopo = "../comunes/imgVisor/topologicos/mapa_cauces_topologico.png"
+
+		//$("#escala").css("background","url("+imgescala+")");
+		$("#info").html(textopie);
+		$("#img_mapatopo").attr("src",imgmapatopo);
+		$("#img_mapatopo").attr("border",0);
+		$("#panel_cauces").html("");
+		$.ajax({
+			type: "POST",
+			dataType: "json",
+			url: "obtener_datos.php",
+			data: "action=consultar_cauces_topo",
+			success: function(data){
+			for (var x = 0 ; x < data.length ; x++) {
+
+				
+				var cajetin = "<div id='"+data[x].CodPuntoMedicion+"' class='cauce_topo_container' style='top:"+data[x].x+"px; left:"+data[x].y+"px; background-color:"+data[x].ColorFondo+";' ";
+				if(data[x].CodVariableHidrologicaNivel == null){
+					cajetin += "title='"+data[x].CodPuntoMedicion+" "+data[x].NombreCortoPM+": "+data[x].CodVariableHidrologicaCaudal;
+				}
+				else{
+					if(data[x].CotaMaximaSeccion == "-"){
+						cajetin += "title='"+data[x].CodPuntoMedicion+" "+data[x].NombreCortoPM+": "+data[x].CodVariableHidrologicaCaudal+" ("+data[x].UltimoDatoNivel+" m )";
+					}
+					else{
+						cajetin += "title='"+data[x].CodPuntoMedicion+" "+data[x].NombreCortoPM+": "+data[x].CodVariableHidrologicaCaudal+" ("+data[x].UltimoDatoNivel+" m / "+data[x].CotaMaximaSeccion+" m = "+data[x].PorcentajeNivel+" %)";
+					}
+				}
+				cajetin += "'>";
+				if(data[x].UltimoDatoCaudal == "-")
+				{
+					if(data[x].ColorFondo == "#FF0000")
+						cajetin += "<a style='color:#000000;' href='visor_variable.php?punto="+data[x].CodVariableHidrologicaCaudal+"'>"+data[x].UltimoDatoCaudal+"</a>";
+					else
+						cajetin += "<a style='color:#FF0000;' href='visor_variable.php?punto="+data[x].CodVariableHidrologicaCaudal+"'>"+data[x].UltimoDatoCaudal+"</a>";
+				}
+				else
+				{
+					colorTexto = data[x].ColorTexto;
+					cajetin += "<a style='color:"+colorTexto+";' href='visor_variable.php?punto="+data[x].CodVariableHidrologicaCaudal+"'>"+data[x].UltimoDatoCaudal+"</a>";
+				}
+				cajetin += "</div>";
+				//alert("cajetin="+cajetin);
+				$("#panel_cauces").append(cajetin);
+			}
+			}
+		});
+		parent.document.getElementById("iframe_izq").src="cauces3.php?tipo="+tipo;	
+		
+	}
+</script>
+<body>
+<script language="javascript">
+		parent.document.getElementById("iframe_izq").src="cauces3.php?tipo="+tiposeleccionado;	
+</script>
+
+<script language="javascript">
+	function OpcVariables() {
+		parent.document.getElementById("iframe_izq").src="submenu_pest2.php?zona=0&punto=04S03";
+	}
+	function SetIframeDcha(Url) {
+		parent.document.getElementById("iframe_der").src=Url;
+	}
+</script>
+
+<div id="menu">
+    <ul>
+        <li>
+			<img class="img_menu clsPuntero" title="Mapa Pluviometría" src="../comunes/imgVisor/datossaih_pluvio_off.png" onclick="javascript:SetIframeDcha('pluviometria1.php');" />
+        </li>
+        <li>
+			<img class="img_menu clsPuntero" title="Mapa Embalses" src="../comunes/imgVisor/datossaih_embalses_mapas_off.png" onclick="javascript:SetIframeDcha('embalses1.php');" />
+        </li>
+        <li>
+           	<img class="img_menu clsPuntero" title="Esquema Topológico Embases" src="../comunes/imgVisor/datossaih_embalses_esquemas_off.png" onclick="javascript:SetIframeDcha('topo_embalses1.php');" />
+        </li>
+        <li>
+           	<img class="img_menu clsPuntero" title="Mapa Cauces" src="../comunes/imgVisor/datossaih_cauces_mapas_off.png" onclick="javascript:SetIframeDcha('cauces1.php');" />
+        </li>
+        <li>
+           	<img class="img_menu clsPuntero" title="Esquema Topológico Cauces" src="../comunes/imgVisor/datossaih_cauces_esquemas_on.png" onclick="javascript:SetIframeDcha('topo_cauces1.php');" />
+        </li>
+		<li>
+			<img class="img_menu clsPuntero" title="Mapa Temperatura" src="../comunes/imgVisor/datossaih_meteo_off.png" onclick="javascript:SetIframeDcha('temp_hum1.php');" />
+		</li>
+        <li>
+			<img class="img_menu clsPuntero" title="Variables en Puntos de Medición" src="../comunes/imgVisor/datossaih_variables_off.png" onclick="javascript:OpcVariables();" />
+        </li>
+    </ul>
+</div>
+<div id="menu" style="position:absolute; top:75px; left:375px; z-index:30;width:280px;">
+	<div style="width:25%;float:left;"><a href="javascript:cauces(0)" id="href_0"><img class="img_menu" id="img_0"></a></div>
+	<div style="width:25%;float:left;"><a href="javascript:cauces(1)" id="href_1"><img class="img_menu" id="img_1"></a></div>
+	<div style="width:25%;float:left;"><a href="javascript:cauces(2)" id="href_2"><img class="img_menu" id="img_2"></a></div>
+	<div style="width:25%;float:left;"><a href="javascript:cauces(3)" id="href_3"><img class="img_menu" id="img_3"></a></div>
+</div>
+
+<div id="menuzona" style="position:absolute; top:110px; left:525px; z-index:30;">
+	<img src="../comunes/imgVisor/topologicos/nav_cauces_topologico.png" border="0" usemap="#Map">
+	<map name="Map">
+		<area title="Zona Cabecera - Bayo" shape="poly" coords="1,2,58,2,58,19,35,19,36,22,1,22" href="javascript:set_zona('1cab-bayo')">
+		<area title="Zona Bayo - Ojós" shape="poly" coords="6,22,6,38,43,38,43,44,60,45,60,41,72,41,72,19,36,19,35,22" href="javascript:set_zona('2bayo-ojos')">
+		<area title="Zona Ojós - Contraparada" shape="poly" coords="22,38,43,38,43,44,60,45,60,41,72,41,72,49,81,49,80,64,22,64" href="javascript:set_zona('3ojos-murcia')">
+		<area title="Zona Contraparada - Beniel" shape="poly" coords="43,65,84,64,84,62,89,63,90,86,43,85" href="javascript:set_zona('8contrap-beniel')">
+		<area title="Zona Guadalentín" shape="poly" coords="1,81,2,99,64,99,65,85,44,85,43,64,22,64,22,59,11,59,11,81" href="javascript:set_zona('4guadalentin')">
+		<area title="Zona Vega Baja I: Beniel - Orihuela" shape="poly" coords="85,63,84,38,117,38,116,75,90,73,90,63" href="javascript:set_zona('5vegabaja1')" />
+		<area title="Zona Vega Baja II: Orihuela - Guardamar" shape="poly" coords="116,38,149,38,149,75,116,74" href="javascript:set_zona('6vegabaja2')" />
+		<area title="Zona Ramblas Costeras" shape="poly" coords="92,77,91,99,147,98,149,77" href="javascript:set_zona('7ramblascosteras')">
+		<area title="Volver al Mapa General" shape="poly" coords="74,3,73,20,73,28,94,27,111,29,134,31,146,30,148,3" href="javascript:set_zona('0')" />
+	</map>
+</div>
+<div id="mapa_topo"><img id="img_mapatopo"></div> 
+<div id="panel_cauces"></div>
+<center><div id="info"></div></center>
+</body>
+</html>

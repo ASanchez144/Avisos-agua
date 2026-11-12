@@ -1,0 +1,16 @@
+User-agent: SemrushBot
+Disallow: /gestorcsv
+Disallow: /web
+Disallow: /solicitar-informacion
+Disallow: /canones-y-tarifas
+Disallow: /galeria-de-videos
+Disallow: /comision_desembalse
+Disallow: /
+
+User-Agent: *
+Disallow: /group*/
+Disallow: /c/portal/
+Disallow: /document*/
+Disallow: /*?p_p_id=
+Disallow: /*p_p_lifecycle=1*
+Sitemap: http://www.chguadalquivir.es/sitemap.xml
