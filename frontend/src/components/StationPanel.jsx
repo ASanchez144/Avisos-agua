@@ -2,6 +2,7 @@ import { ArrowDownToLine, ArrowUpFromLine, CloudRain, Container, Droplets, Equal
 import { flowEquivalences, num, reservoirTrend } from '../lib/format.js';
 import { statusMeta } from '../lib/status.js';
 import DemoBadge from './DemoBadge.jsx';
+import CameraView from './CameraView.jsx';
 import Freshness from './Freshness.jsx';
 import Hydrograph from './Hydrograph.jsx';
 import LevelBar from './LevelBar.jsx';
@@ -126,6 +127,7 @@ export default function StationPanel({ station, history, now = new Date(), demo 
             </div>
           </>
         )}
+        {!demo && <CameraView stationId={station.station_id} now={now} />}
         <SensorGuide />
         <p className="text-xs text-slate-500">Fuente del dato: {station.source}. Identificador: {station.station_id}.</p>
       </div>

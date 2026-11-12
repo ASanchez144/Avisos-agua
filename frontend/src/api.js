@@ -11,6 +11,7 @@ export const api = {
   stations: () => get('/stations'),
   station: (id) => get(`/stations/${encodeURIComponent(id)}`),
   history: (id, limit = 150) => get(`/stations/${encodeURIComponent(id)}/history?limit=${limit}`),
+  camera: (id) => get(`/stations/${encodeURIComponent(id)}/camera`),
   alerts: () => get('/alerts'),
   propagation: () => get('/propagation'),
 };

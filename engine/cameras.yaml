@@ -1,0 +1,22 @@
+# Lista CURADA de cámaras que enfocan un cauce o un puente. Solo para VER la imagen en directo
+# (sin análisis automático de ningún tipo).
+#
+# Una cámara entra aquí SOLO si una persona ha mirado su imagen y comprobado que enfoca el cauce o
+# el puente (focus_verified: true + verified_by). La DGT publica cámaras de tráfico: la mayoría
+# miran la carretera, no el río. A 2026-11-12 se revisaron a ojo las más cercanas a las estaciones
+# del proyecto y NINGUNA enfoca el cauce (ver docs/CAMERAS.md), por eso la lista está vacía.
+#
+# Formato de cada entrada:
+#   - id: "112"                         # id de la cámara en el feed DATEX II de la DGT
+#     station_id: "saih_jucar:rambla_poyo"
+#     lat: 39.48
+#     lon: -0.58                        # coordenadas de la cámara (del feed); a < max_distance_km de la estación
+#     image_url: https://etraffic.dgt.es/camarasEtraffic/112.jpg   # hotlink: no se descarga ni se guarda
+#     origin_url: https://infocar.dgt.es/etraffic/
+#     focus_verified: true
+#     verified_by: "nombre de quien lo comprobó"
+#     verified_on: "2026-11-12"
+
+max_distance_km: 3
+stale_after_minutes: 20   # imagen con más edad que esto -> "Cámara sin señal"
+cameras: []
