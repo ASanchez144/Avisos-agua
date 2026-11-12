@@ -102,3 +102,14 @@ def test_el_script_no_usa_cookies_ni_claves():
 
 def test_fuentes_desconocidas_dan_error(capsys):
     assert probe.main(["no_existe"]) == 2
+
+
+def test_descubre_tambien_enlaces_de_camaras_y_saih():
+    html = '<a href="/webcams">Cámaras en directo</a><a href="/saih">SAIH tiempo real</a><a href="/noticias">Noticias</a>'
+    links = [u for u, _ in probe.Prober(session=Falsa({}), pause=0).discover("https://www.chguadiana.es/", html)]
+    assert links == ["https://www.chguadiana.es/webcams", "https://www.chguadiana.es/saih"]
+
+
+def test_incluye_los_portales_oficiales_de_todas_las_confederaciones():
+    for clave in ("chguadiana", "chebro_portal", "chj_portal", "chduero_portal", "chminosil_portal", "navarra_agua", "meteogalicia_aforos"):
+        assert clave in probe.TARGETS, clave

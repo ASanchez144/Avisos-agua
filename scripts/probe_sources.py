@@ -38,8 +38,8 @@ ROOT = Path(__file__).resolve().parent.parent
 UA = "HidroRed/0.1 (radar ciudadano hidrologico no oficial; prueba de fuentes)"
 PAUSE_S = 2.0
 TIMEOUT_S = 40
-MAX_DISCOVERED = 6
-KEYWORDS = re.compile(r"aforo|embalse|tabla|estaci[oó]n|caudal|nivel|tiempo[- ]?real|datos", re.I)
+MAX_DISCOVERED = 8
+KEYWORDS = re.compile(r"aforo|embalse|tabla|estaci[oó]n|caudal|nivel|tiempo[- ]?real|datos|saih|c[aá]mara|webcam|foronom", re.I)
 BIG_BYTES = 1_000_000
 
 # fuente -> {"discover": bool, "urls": [(nombre, método, url, datos_form_o_None)]}
@@ -58,6 +58,17 @@ TARGETS: dict[str, dict] = {
         ("resumen_rios", "GET", "https://www.redhidrosurmedioambiente.es/saih/resumen/rios", None),
         ("capas_aforos", "GET", "https://www.redhidrosurmedioambiente.es/saih/assets/visorSAIH/capas/Aforos.json", None),
     ]},
+    # Portales oficiales: solo la portada; el resto se descubre siguiendo sus propios enlaces (sin inventar rutas).
+    "chguadiana": {"discover": True, "urls": [("portada", "GET", "https://www.chguadiana.es/", None)]},
+    "chebro_portal": {"discover": True, "urls": [("portada", "GET", "https://www.chebro.es/", None)]},
+    "chj_portal": {"discover": True, "urls": [("portada", "GET", "https://www.chj.es/", None)]},
+    "chduero_portal": {"discover": True, "urls": [("portada", "GET", "https://www.chduero.es/", None)]},
+    "chminosil_portal": {"discover": True, "urls": [("portada", "GET", "https://www.chminosil.es/", None)]},
+    "chtajo_portal": {"discover": True, "urls": [("portada", "GET", "https://www.chtajo.es/", None)]},
+    "navarra_agua": {"discover": True, "urls": [("portada", "GET", "https://www.navarra.es/", None)]},
+    # MeteoGalicia + Augas de Galicia: API JSON oficial con clave gratuita (se pide por email). Sin clave solo se
+    # comprueba que responde; su robots.txt prohíbe el rastreo, así que NO se descubren enlaces.
+    "meteogalicia_aforos": {"discover": False, "urls": [("json_sin_clave", "GET", "https://servizos.meteogalicia.gal/mgafos/json/estadoActual.action", None)]},
     "dgt": {"discover": False, "urls": [("camaras_datex2", "GET", "https://nap.dgt.es/datex2/v3/dgt/DevicePublication/camaras_datex2_v37.xml", None)]},
 }
 
