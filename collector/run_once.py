@@ -15,6 +15,7 @@ from backend.scheduler import run_cycle
 from connectors.aca import AcaConnector
 from connectors.aemet import AemetConnector
 from connectors.euskalmet import EuskalmetConnector
+from connectors.hidrosur import HidrosurConnector
 from connectors.http import PoliteHttpClient
 from connectors.saih_cantabrico import SaihCantabricoConnector
 
@@ -30,6 +31,11 @@ def has_euskalmet(env=os.environ) -> bool:
     return bool(env.get("EUSKALMET_PRIVATE_KEY") and env.get("EUSKALMET_EMAIL")) or bool(env.get("EUSKALMET_JWT"))
 
 
+def has_hidrosur(env=os.environ) -> bool:
+    """Hidrosur no da permiso expreso de reutilización (docs/LEGAL.md): solo si se activa a propósito."""
+    return env.get("HIDROSUR_ENABLED", "").strip() == "1"
+
+
 def build_connectors(db: Database, include_aemet: bool = True, include_euskalmet: bool | None = None) -> list:
     client = PoliteHttpClient(store=db)
     connectors = [SaihCantabricoConnector(client), AcaConnector(client)]
@@ -37,6 +43,8 @@ def build_connectors(db: Database, include_aemet: bool = True, include_euskalmet
         connectors.append(AemetConnector(client))
     if has_euskalmet() if include_euskalmet is None else include_euskalmet:
         connectors.append(EuskalmetConnector(client))
+    if has_hidrosur():
+        connectors.append(HidrosurConnector(client))
     return connectors
 
 

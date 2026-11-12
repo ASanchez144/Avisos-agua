@@ -387,3 +387,83 @@ CASES.append(HarnessCase(
     reference_dir=_EUS_REFERENCE, official_values=_eus_official_values,
     unsupported_fields=frozenset(_EUS_UNSUPPORTED),
 ))
+
+
+# ------------------------------------------------------------------ Hidrosur
+
+from connectors import hidrosur  # noqa: E402
+
+_HS_FIX = TESTS / "fixtures" / "hidrosur"
+_HS_REFERENCE = TESTS / "reference" / "hidrosur"
+_HS_STATION = "9"
+_HS_UNSUPPORTED = {"rain_1h_mm", "rain_24h_mm"}  # la tabla de ríos no trae lluvia
+
+
+def _hs_now() -> datetime:
+    text = (_HS_FIX / "fetched_at_utc.txt").read_text().strip()
+    return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+
+
+def _hs_parse(table: str, layer: dict[str, Any]) -> list[Reading]:
+    return hidrosur.parse(table.encode("utf-8"), json.dumps(layer).encode(), _hs_now())
+
+
+def _hs_inject(overrides: dict[str, Any]) -> Reading:
+    unsupported = set(overrides) & _HS_UNSUPPORTED
+    if unsupported:
+        raise UnsupportedVariable(f"hidrosur no publica {sorted(unsupported)}")
+    table = (_HS_FIX / "resumen_rios.html").read_text(encoding="utf-8")
+    layer = json.loads((_HS_FIX / "capa_aforos.json").read_text(encoding="utf-8"))
+    place = next(f["properties"] for f in layer["features"] if str(f["properties"]["COD_"]) == _HS_STATION)
+    row_re = re.compile(r"(<tr[^>]*>\s*<td[^>]*>\s*" + _HS_STATION + r"\s*</td>.*?</tr>)", re.S)
+    row = row_re.search(table).group(1)
+    cells = re.findall(r"(<td[^>]*>)(.*?)(</td>)", row, re.S)
+    new_cells = [c[1] for c in cells]
+    keys = {"thresholds.yellow": "Aviso", "thresholds.orange": "Prealerta", "thresholds.red": "Alerta",
+            "lat": "Latitud", "lon": "Longitud"}
+    for field, value in overrides.items():
+        if field == "level_m":
+            new_cells[2] = repr(value).replace(".", ",")
+        elif field == "flow_m3s":
+            new_cells[3] = repr(value).replace(".", ",")
+        elif field == "timestamp_utc":
+            local = value.astimezone(_MADRID).strftime("%d-%m-%Y %H:%M:%S")
+            table = re.sub(r"Datos actualizados a:\s*\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}", "Datos actualizados a: " + local, table)
+        else:
+            place[keys[field]] = value
+    rebuilt = row
+    for (open_, old, close), new in zip(cells, new_cells):
+        rebuilt = rebuilt.replace(open_ + old + close, open_ + new + close, 1)
+    table = table.replace(row, rebuilt)
+    return next(r for r in _hs_parse(table, layer) if r.station_id == f"{hidrosur.SOURCE}:{_HS_STATION}")
+
+
+def _hs_official_values() -> list[OfficialValue]:
+    """Gráficas oficiales /saih/mapa/tiempo/real/grafica/<código> (tests/reference/hidrosur/): serie
+    horaria del nivel (m., hora local "dd/mm/aa HH:MM") y líneas "Nivel 1/2/3" = umbrales."""
+    out: list[OfficialValue] = []
+    for file in sorted(_HS_REFERENCE.glob("grafica_*.html")):
+        page = file.read_text(encoding="utf-8")
+        station = f"{hidrosur.SOURCE}:{int(file.stem.split('_')[1][:3])}"
+        labels = json.loads(re.search(r"var labels = (\[.*?\]);", page, re.S).group(1))
+        serie = re.search(r"var serie1 = (\[.*?\]);", page, re.S).group(1)
+        values = [v.strip() for v in serie.strip("[]").split(",")]
+        for label, shown in zip(labels, values):
+            if _NUMERIC.fullmatch(shown):
+                ts = datetime.strptime(label, "%d/%m/%y %H:%M").replace(tzinfo=_MADRID).astimezone(timezone.utc)
+                out.append(OfficialValue(station, "level_m", shown, ts))
+        for n, colour in ((1, "yellow"), (2, "orange"), (3, "red")):
+            m = re.search(r"label: 'Nivel " + str(n) + r"'.*?return ([-\d.]+);", page, re.S)
+            if m:
+                out.append(OfficialValue(station, f"threshold:level_m:{colour}", m.group(1), None))
+    return out
+
+
+CASES.append(HarnessCase(
+    source=hidrosur.SOURCE, fixture_now=_hs_now(),
+    parse_fixture=lambda: _hs_parse((_HS_FIX / "resumen_rios.html").read_text(encoding="utf-8"),
+                                    json.loads((_HS_FIX / "capa_aforos.json").read_text(encoding="utf-8"))),
+    fetch_live=lambda: hidrosur.HidrosurConnector().fetch(), inject=_hs_inject,
+    reference_dir=_HS_REFERENCE, official_values=_hs_official_values,
+    unsupported_fields=frozenset(_HS_UNSUPPORTED),
+))

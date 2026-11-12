@@ -32,5 +32,6 @@ jobs:
           AEMET_API_KEY: ${{ secrets.AEMET_API_KEY }}
           EUSKALMET_PRIVATE_KEY: ${{ secrets.EUSKALMET_PRIVATE_KEY }}
           EUSKALMET_EMAIL: ${{ secrets.EUSKALMET_EMAIL }}
+          HIDROSUR_ENABLED: ${{ vars.HIDROSUR_ENABLED }}
         run: python -m collector.run_once
 

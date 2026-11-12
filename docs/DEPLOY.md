@@ -48,6 +48,10 @@ Añade en GitHub Secrets **y** en Vercel (Settings → Environment Variables, Pr
 
 El colector firma un JWT nuevo en cada ciclo. Sin estas dos variables Euskalmet no se consulta (no aparece como caído).
 
+### Hidrosur (opcional, ver docs/LEGAL.md)
+
+`HIDROSUR_ENABLED=1` en Vercel (Environment Variables) y como **variable** (no secreto) de GitHub Actions. Sin ella no se consulta.
+
 ## 3. Primera ejecución del colector
 
 Pestaña **Actions → collector → Run workflow**. Debe terminar en verde en ~1 min. En el log aparece un JSON con una entrada por fuente (`saih_cantabrico`, `aca`, `aemet`, `aemet:avisos`) con `"ok": true` y el nº de lecturas. Un conector que falla sale con `"ok": false` y su error, **sin tumbar el ciclo** (el job solo falla si no hay base de datos).

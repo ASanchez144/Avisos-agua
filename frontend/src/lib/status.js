@@ -27,3 +27,30 @@ export function worstStatus(statuses) {
 }
 
 export const WARNING_COLORS = { amarillo: '#facc15', naranja: '#fb923c', rojo: '#ef4444' };
+
+const RING_ORDER = ['ALERTA', 'PREALERTA', 'VIGILANCIA', 'NORMAL', 'SIN_UMBRAL', 'DATO_OBSOLETO', 'SIN_DATOS'];
+const ALERT_LEVELS = ['ALERTA', 'PREALERTA', 'VIGILANCIA'];
+
+/** Reparto de estados de un grupo, en orden fijo: [{ status, count }]. */
+export function statusBreakdown(statuses) {
+  const normalized = statuses.map((s) => (STATUS[s] ? s : 'SIN_UMBRAL'));
+  return RING_ORDER.map((status) => ({ status, count: normalized.filter((s) => s === status).length })).filter((p) => p.count);
+}
+
+/** Anillo proporcional (conic-gradient) con el color de cada estado del grupo. */
+export function ringGradient(statuses) {
+  const parts = statusBreakdown(statuses);
+  const total = parts.reduce((n, p) => n + p.count, 0) || 1;
+  let acc = 0;
+  const stops = parts.map((p) => {
+    const from = (acc / total) * 360;
+    acc += p.count;
+    return `${STATUS[p.status].color} ${from.toFixed(1)}deg ${((acc / total) * 360).toFixed(1)}deg`;
+  });
+  return `conic-gradient(${stops.join(', ')})`;
+}
+
+/** Peor nivel de AVISO del grupo (alerta > prealerta > vigilancia) o null si no hay ninguno. */
+export function worstAlert(statuses) {
+  return ALERT_LEVELS.find((s) => statuses.includes(s)) || null;
+}

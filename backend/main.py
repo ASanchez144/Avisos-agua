@@ -35,6 +35,10 @@ else:
     if has_euskalmet():  # Euskalmet: EUSKALMET_PRIVATE_KEY + EUSKALMET_EMAIL
         from connectors.euskalmet import EuskalmetConnector
         connectors.append(EuskalmetConnector(client))
+    from collector.run_once import has_hidrosur
+    if has_hidrosur():  # HIDROSUR_ENABLED=1 (ver docs/LEGAL.md)
+        from connectors.hidrosur import HidrosurConnector
+        connectors.append(HidrosurConnector(client))
 
     @asynccontextmanager
     async def lifespan(_app):

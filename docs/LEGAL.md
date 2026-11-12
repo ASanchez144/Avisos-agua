@@ -45,6 +45,12 @@ Aviso permanente del proyecto (obligatorio en la UI y presente en todas las resp
 - Uso: 1 petición por estación cada 15 min (48 peticiones por ciclo), User-Agent identificable, robots.txt respetado. La clave privada no se guarda en el repositorio: va en secretos (GitHub Actions y Vercel).
 - Para la verificación (ley 8) se descargaron una vez 4 ficheros de datos que usa la web oficial (`/vamet/stations/readings/...`); robots.txt no lo prohíbe.
 
+### Red Hidrosur — Junta de Andalucía (conector `hidrosur`) — ⚠️ RIESGO LEGAL (apagado por defecto)
+
+- Términos de la web (texto real, Fase 0): contenidos "propiedad de la empresa o de terceros con licencia"; datos "no verificados", "carecen de valor oficial". **No hay permiso expreso de reutilización.**
+- Por eso el conector existe y está probado, pero **solo se activa con `HIDROSUR_ENABLED=1`**. Recomendado: pedir autorización por su formulario de contacto antes de activarlo en público.
+- Uso: 2 peticiones cada 15 min (tabla de ríos y capa de aforos), robots.txt sin restricciones.
+
 ### Otros datos y servicios usados
 
 - **Mapa base (RIESGO LEGAL para producción):** teselas de OpenStreetMap (© colaboradores de OpenStreetMap, ODbL), con atribución visible en el mapa. Su política de uso de teselas no admite uso intensivo: para producción hay que usar un proveedor propio o contratado.

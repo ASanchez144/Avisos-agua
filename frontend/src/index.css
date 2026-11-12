@@ -27,6 +27,11 @@ body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
 .hr-marker.hr-cluster { width: 40px; height: 40px; font-size: 13px; border-width: 3px; }
 .hr-marker.hr-cluster svg { width: 15px; height: 15px; }
 .hr-marker { position: relative; }
+.hr-cluster-ring { width: 42px; height: 42px; border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 2px #0f172a; }
+.hr-cluster-core { width: 30px; height: 30px; border-radius: 9999px; background: #0f172a; color: #f8fafc; display: flex;
+  align-items: center; justify-content: center; gap: 1px; font-size: 12px; font-weight: 700; }
+.hr-cluster-core svg { width: 11px; height: 11px; }
 .hr-cam { position: absolute; right: -8px; top: -8px; display: flex; align-items: center; justify-content: center;
   width: 17px; height: 17px; border-radius: 9999px; background: #0f172a; color: #f8fafc; border: 1.5px solid #f8fafc; }
 .hr-cam svg { width: 10px; height: 10px; }

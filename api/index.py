@@ -34,8 +34,9 @@ def build() -> FastAPI:
 
         # Sin AEMET_API_KEY en Vercel no se intenta AEMET (no se marca como caída: la recoge GitHub Actions).
         has_aemet = bool(os.environ.get("AEMET_API_KEY"))
-        from collector.run_once import has_euskalmet
-        sources = ("saih_cantabrico", "aca") + (("aemet",) if has_aemet else ()) + (("euskalmet",) if has_euskalmet() else ())
+        from collector.run_once import has_euskalmet, has_hidrosur
+        sources = ("saih_cantabrico", "aca") + (("aemet",) if has_aemet else ()) + (("euskalmet",) if has_euskalmet() else ()) \
+            + (("hidrosur",) if has_hidrosur() else ())
         from connectors.saih_cantabrico_cameras import SaiCameraService
         inner = create_app(db, collector=collector, collector_sources=sources, sai_cameras=SaiCameraService(db))
     outer = FastAPI(title="HidroRed España", docs_url=None, redoc_url=None)

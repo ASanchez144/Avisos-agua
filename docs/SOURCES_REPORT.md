@@ -135,7 +135,9 @@ Base: `https://opendata.aemet.es/opendata/api/`. Autenticación por cabecera `ap
 - **Campos reales (tabla ríos):** `Número`, `Nombre`, `Nivel medio (m)`, `Caudal medio (m³/s)`, `Tendencia`, máximos históricos (fecha, nivel, caudal). Decimales con coma. Pie: "Datos actualizados a: 11-11-2026 12:00:00".
 - **Campos reales (capa Aforos):** `COD_`, `Nombre`, `Latitud`, `Longitud`, `Río`, `Provincia`, `Municipio`, **`Aviso`, `Prealerta`, `Alerta`** (niveles en m), `Max_Nivel`, `Fecha_Max`.
 - **Frecuencia real:** sello global "12:00:00" visto a las 12:55 locales → **parece horaria (NO VERIFICADO)**. Son valores **medios**, no instantáneos.
-- **Umbrales oficiales:** sí, en la capa estática (3 niveles de nivel). Cruce por `COD_` = `Número` (**cruce NO VERIFICADO estación a estación**).
+- **Umbrales oficiales:** sí, en la capa estática (Aviso/Prealerta/Alerta). **Verificados el 2026-11-12**: la gráfica oficial de cada estación (`/saih/mapa/tiempo/real/grafica/<código>`) dibuja "Nivel 1/2/3" con esos valores en el eje del nivel (m.). 0/0/0 = sin umbral.
+- **Conector `hidrosur` (2026-11-12):** 32 estaciones con coordenadas (6 de la tabla no están en la capa y se omiten; la 86 aparece dos veces con valores distintos → SUSPECT). Apagado por defecto (`HIDROSUR_ENABLED=1`) por los términos de uso.
+- **Más datos en la misma web (sin conector aún):** `/saih/resumen/precipitacion` (lluvia última hora y 24 h por pluviómetro) y `/saih/resumen/embalses` (% y hm³).
 - **robots.txt:** `User-agent: *` sin restricciones.
 - **Términos (texto real):** contenidos "propiedad de la empresa o de terceros con licencia"; "los datos [...] no están verificados [...] carecen de valor oficial". **No hay permiso expreso de reutilización** → pedir autorización antes de publicar.
 - **Fixture:** `tests/fixtures/hidrosur/`.

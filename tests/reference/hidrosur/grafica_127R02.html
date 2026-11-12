@@ -1,0 +1,624 @@
+
+<style>
+/*
+ * Estilo comun para todas las graficas de resumen.
+ * De momento se mantiene en la vista y se movera al CSS comun
+ * cuando terminemos la unificacion de estilos.
+ */
+.saih-chart-modal__header {
+    padding: 14px 18px 11px;
+    border-bottom: 1px solid #d9e4e8;
+    background: #f8fbfc;
+}
+.saih-chart-modal__header .modal-title {
+    padding-right: 28px;
+    color: #294b5b;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+.saih-chart-modal__header .close {
+    margin-top: 0;
+    color: #607d89;
+    opacity: .75;
+}
+.saih-chart-modal__header .close:hover,
+.saih-chart-modal__header .close:focus {
+    color: #294b5b;
+    opacity: 1;
+}
+.saih-chart-modal__body {
+    padding: 14px 18px 18px;
+    background: #fff;
+}
+.saih-chart-modal__unit-row {
+    padding: 0;
+}
+.saih-chart-modal__unit {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    margin: 0 0 10px 0;
+    padding: 4px 10px;
+    border: 1px solid #d7e2e6;
+    border-radius: 7px;
+    background: #f5f9fa;
+    color: #496b79;
+    font-size: 11.5px;
+    font-weight: 600;
+}
+.saih-chart-modal__panel {
+    padding: 12px 12px 7px;
+    border: 1px solid #d9e4e8;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(41, 79, 96, 0.06);
+}
+.saih-chart-modal__footer {
+    padding: 10px 18px;
+    border-top: 1px solid #e2eaed;
+    background: #f8fbfc;
+}
+.saih-chart-modal__footer .btn {
+    min-width: 82px;
+    border-color: #cbd8dd;
+    border-radius: 6px;
+    color: #365a69;
+    background: #fff;
+}
+.saih-chart-modal__footer .btn:hover,
+.saih-chart-modal__footer .btn:focus {
+    border-color: #9fb6bf;
+    color: #294b5b;
+    background: #eef5f7;
+}
+@media (max-width: 767px) {
+    .saih-chart-modal__header { padding: 12px 14px 9px; }
+    .saih-chart-modal__body { padding: 10px 12px 14px; }
+    .saih-chart-modal__panel { padding: 8px 7px 4px; }
+    .saih-chart-modal__unit { font-size: 11px; }
+}
+
+/* Vista embebida: solo activa con ?dashboard=1. */
+</style>
+
+<div class="modal-header saih-chart-modal__header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">RÍO GUADALHORCE (BOBADILLA) (MA) - NIVEL RÍO</h4>
+</div>
+
+<div class="modal-body saih-chart-modal__body">
+    <div class="col-sm-12 saih-chart-modal__unit-row">
+        <span class="saih-chart-modal__unit">m.</span>
+    </div>
+    <div class="col-sm-12 saih-chart-modal__panel" id="anchoCanvas">
+        <canvas id="canvas" class="canvasStyle" style="width:100% !important;height:auto;"></canvas>
+    </div>
+</div>
+
+<div class="modal-footer saih-chart-modal__footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+</div>
+
+<script src="https://www.redhidrosurmedioambiente.es/saih/assets/js/Chart.bundle.js"></script>
+
+<script>
+(function () {
+    var ctx = document.getElementById("canvas").getContext("2d");
+
+    var modoDashboard = false;
+
+    // tamaño (tu hack)
+    var swidth = 56, sheight = 40;
+    if (screen.width<1700) swidth = 50;
+    if (screen.width<1600) swidth = 44;
+    if (screen.width<1400) swidth = 35;
+    if (screen.width<1200) swidth = 25;
+    if (screen.width<900)  swidth = 32;
+    if (screen.width<600)  swidth = 20;
+    if (screen.height<450) sheight = 1;
+    if (!modoDashboard) {
+        ctx.canvas.width  = screen.width - ((swidth*screen.width)/100);
+        ctx.canvas.height = screen.height - ((sheight*screen.height)/100);
+    } // En modo dashboard Chart.js toma el ancho y alto del contenedor.
+
+
+    // destruir si ya existe (reabrir modal)
+    if (window.__saihChart) {
+        try { window.__saihChart.destroy(); } catch(e) {}
+    }
+
+    var labels = ["10\/11\/26 14:00","10\/11\/26 15:00","10\/11\/26 16:00","10\/11\/26 17:00","10\/11\/26 18:00","10\/11\/26 19:00","10\/11\/26 20:00","10\/11\/26 21:00","10\/11\/26 22:00","10\/11\/26 23:00","11\/11\/26 00:00","11\/11\/26 01:00","11\/11\/26 02:00","11\/11\/26 03:00","11\/11\/26 04:00","11\/11\/26 05:00","11\/11\/26 06:00","11\/11\/26 07:00","11\/11\/26 08:00","11\/11\/26 09:00","11\/11\/26 10:00","11\/11\/26 11:00","11\/11\/26 12:00","11\/11\/26 13:00","11\/11\/26 14:00","11\/11\/26 15:00","11\/11\/26 16:00","11\/11\/26 17:00","11\/11\/26 18:00","11\/11\/26 19:00","11\/11\/26 20:00","11\/11\/26 21:00","11\/11\/26 22:00","11\/11\/26 23:00","12\/11\/26 00:00","12\/11\/26 01:00","12\/11\/26 02:00","12\/11\/26 03:00","12\/11\/26 04:00","12\/11\/26 05:00","12\/11\/26 06:00","12\/11\/26 07:00","12\/11\/26 08:00","12\/11\/26 09:00","12\/11\/26 10:00","12\/11\/26 11:00","12\/11\/26 12:00","12\/11\/26 13:00","12\/11\/26 14:00"];
+    var serie1 = [0.14,0.15,0.15,0.15,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.15,0.16,0.16,0.16,0.16,0.16,0.16,0.16,0.16,0.16,0.16,0.16,0.16,0.16,0.15,0.15,0.15,0.16,0.16,0.16,0.17,0.18,0.17,0.17,0.17,0.25,0.31,0.3,0.27,0.25,0.23,0.22,0.2,0.2];
+
+    var sensorTipo = "R";
+
+    if (sensorTipo !== 'P' && sensorTipo !== 'N') {
+        var lineChartData = {
+            labels: labels,
+            datasets: [{
+            label: "NIVEL R\u00cdO",
+
+                borderColor: "rgba(151,187,205,1)",
+                backgroundColor: "rgba(151,187,205,0.4)",
+                fill: true,
+                data: serie1,
+                yAxisID: "y-axis-1",
+                pointRadius: 0,
+                pointHoverRadius: 3,
+                borderWidth: 2,
+                lineTension: 0.18
+            }
+                        ,{
+                label: 'Nivel 1',
+                borderColor: "rgba(255,255,0,1)",
+                backgroundColor: "rgba(255,255,0,1)",
+                fill: false,
+                radius: 0,
+                borderWidth: 1,
+                data: labels.map(function(){ return 2.5; }),
+                yAxisID: "y-axis-1",
+            },{
+                label: 'Nivel 2',
+                borderColor: "rgba(255,128,0,1)",
+                backgroundColor: "rgba(255,128,0,1)",
+                fill: false,
+                radius: 0,
+                borderWidth: 1,
+                data: labels.map(function(){ return 3; }),
+                yAxisID: "y-axis-1",
+            },{
+                label: 'Nivel 3',
+                borderColor: "rgba(255,0,0,1)",
+                backgroundColor: "rgba(255,0,0,1)",
+                fill: false,
+                radius: 0,
+                borderWidth: 1,
+                data: labels.map(function(){ return 4; }),
+                yAxisID: "y-axis-1",
+            }
+                        ]
+        };
+
+        window.__saihChart = new Chart(ctx, {
+            type: 'line',
+            data: lineChartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: !modoDashboard,
+                hoverMode: 'index',
+                stacked: false,
+
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        fontColor: '#456875',
+                        fontSize: 12,
+                        boxWidth: 18,
+                        padding: 16,
+                        usePointStyle: true
+                    }
+                },
+
+                tooltips: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(41, 79, 96, 0.94)',
+                    titleFontColor: '#ffffff',
+                    bodyFontColor: '#ffffff',
+                    titleFontSize: 12,
+                    bodyFontSize: 11,
+                    cornerRadius: 7,
+                    xPadding: 10,
+                    yPadding: 9,
+                    displayColors: true
+                },
+
+                scales: {
+                    xAxes: [{
+                        gridLines: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            fontColor: '#78909c',
+                            fontSize: 11,
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    }],
+                    yAxes: [{
+                        type: "linear",
+                        display: true,
+                        position: "left",
+                        id: "y-axis-1",
+                        gridLines: {
+                            color: 'rgba(120, 144, 156, 0.13)',
+                            zeroLineColor: 'rgba(120, 144, 156, 0.24)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            fontColor: '#78909c',
+                            fontSize: 11,
+                                                        beginAtZero: true,
+                                                        max: 7.03                        }
+                    }]
+                }
+            }
+        });
+
+} else {
+
+    /*
+     * =====================================================
+     * Precipitación / Nivometría
+     * =====================================================
+     */
+
+    var esPrecipitacion =
+        sensorTipo === 'P';
+
+    /*
+     * Mantenemos los colores propios de cada tipo,
+     * pero suavizamos el relleno de las barras.
+     */
+    var colorBarras =
+        esPrecipitacion
+            ? 'rgba(77, 151, 181, 0.72)'
+            : 'rgba(183, 112, 211, 0.68)';
+
+    var colorBordeBarras =
+        esPrecipitacion
+            ? 'rgba(63, 130, 158, 0.95)'
+            : 'rgba(160, 91, 190, 0.95)';
+
+    var colorAcumulado =
+        esPrecipitacion
+            ? 'rgba(54, 88, 126, 1)'
+            : 'rgba(94, 63, 139, 1)';
+
+
+    var barChartData = {
+
+        labels:
+            labels,
+
+        datasets: [
+
+            {
+                type:
+                    'bar',
+
+                label:
+                    "Nivometr\u00eda horaria",
+
+                borderColor:
+                    colorBordeBarras,
+
+                backgroundColor:
+                    colorBarras,
+
+                borderWidth:
+                    1,
+
+                hoverBackgroundColor:
+                    esPrecipitacion
+                        ? 'rgba(77, 151, 181, 0.90)'
+                        : 'rgba(183, 112, 211, 0.86)',
+
+                hoverBorderColor:
+                    colorBordeBarras,
+
+                data:
+                    serie1,
+
+                yAxisID:
+                    'y-axis-1',
+
+                /*
+                 * Dejamos algo de aire entre columnas.
+                 */
+                categoryPercentage:
+                    0.86,
+
+                barPercentage:
+                    0.82
+            },
+
+            {
+                type:
+                    'line',
+
+                label:
+                    "Precipitaci\u00f3n acumulada",
+
+                borderColor:
+                    colorAcumulado,
+
+                backgroundColor:
+                    colorAcumulado,
+
+                fill:
+                    false,
+
+                pointRadius:
+                    0,
+
+                pointHoverRadius:
+                    3,
+
+                borderWidth:
+                    2,
+
+                lineTension:
+                    0.18,
+
+                data:
+                    [],
+
+                yAxisID:
+                    "y-axis-2"            }
+        ]
+    };
+
+
+    window.__saihChart =
+        new Chart(
+            ctx,
+            {
+                type:
+                    'bar',
+
+                data:
+                    barChartData,
+
+                options: {
+
+                    responsive:
+                        true,
+
+                    maintainAspectRatio:
+                        !modoDashboard,
+
+                    hoverMode:
+                        'index',
+
+                    stacked:
+                        false,
+
+
+                    /*
+                     * Leyenda
+                     */
+                    legend: {
+
+                        display:
+                            true,
+
+                        position:
+                            'top',
+
+                        labels: {
+
+                            fontColor:
+                                '#456875',
+
+                            fontSize:
+                                12,
+
+                            boxWidth:
+                                18,
+
+                            padding:
+                                16,
+
+                            usePointStyle:
+                                true
+                        }
+                    },
+
+
+                    /*
+                     * Tooltip
+                     */
+                    tooltips: {
+
+                        enabled:
+                            true,
+
+                        mode:
+                            'index',
+
+                        intersect:
+                            false,
+
+                        backgroundColor:
+                            'rgba(41, 79, 96, 0.94)',
+
+                        titleFontColor:
+                            '#ffffff',
+
+                        bodyFontColor:
+                            '#ffffff',
+
+                        titleFontSize:
+                            12,
+
+                        bodyFontSize:
+                            11,
+
+                        cornerRadius:
+                            7,
+
+                        xPadding:
+                            10,
+
+                        yPadding:
+                            9,
+
+                        displayColors:
+                            true
+                    },
+
+
+                    /*
+                     * Ejes
+                     */
+                    scales: {
+
+                        xAxes: [
+
+                            {
+                                gridLines: {
+
+                                    display:
+                                        false,
+
+                                    drawBorder:
+                                        false
+                                },
+
+                                ticks: {
+
+                                    fontColor:
+                                        '#78909c',
+
+                                    fontSize:
+                                        11,
+
+                                    maxRotation:
+                                        45,
+
+                                    minRotation:
+                                        0
+                                }
+                            }
+                        ],
+
+
+                        yAxes: [
+
+                            {
+                                type:
+                                    'linear',
+
+                                display:
+                                    true,
+
+                                position:
+                                    'left',
+
+                                id:
+                                    'y-axis-1',
+
+                                scaleLabel: {
+
+                                    display:
+                                        true,
+
+                                    labelString:
+                                        "",
+
+                                    fontColor:
+                                        '#607d89',
+
+                                    fontSize:
+                                        12
+                                },
+
+                                gridLines: {
+
+                                    color:
+                                        'rgba(120, 144, 156, 0.13)',
+
+                                    zeroLineColor:
+                                        'rgba(120, 144, 156, 0.24)',
+
+                                    drawBorder:
+                                        false
+                                },
+
+                                ticks: {
+
+                                    beginAtZero:
+                                        true,
+
+                                    fontColor:
+                                        '#78909c',
+
+                                    fontSize:
+                                        11,
+
+                                    max:
+                                        7.03                                }
+                            }
+
+                            
+                            ,{
+                                type:
+                                    'linear',
+
+                                display:
+                                    true,
+
+                                position:
+                                    'right',
+
+                                id:
+                                    'y-axis-2',
+
+                                scaleLabel: {
+
+                                    display:
+                                        true,
+
+                                    labelString:
+                                        "Precipitaci\u00f3n acumulada",
+
+                                    fontColor:
+                                        '#607d89',
+
+                                    fontSize:
+                                        12
+                                },
+
+                                gridLines: {
+
+                                    /*
+                                     * Evita duplicar la rejilla
+                                     * del eje izquierdo.
+                                     */
+                                    drawOnChartArea:
+                                        false,
+
+                                    drawBorder:
+                                        false
+                                },
+
+                                ticks: {
+
+                                    beginAtZero:
+                                        true,
+
+                                    fontColor:
+                                        '#78909c',
+
+                                    fontSize:
+                                        11,
+
+                                    max:
+                                        1                                }
+                            }
+
+                                                    ]
+                    }
+                }
+            }
+        );
+}
+   
+
+})();
+</script>

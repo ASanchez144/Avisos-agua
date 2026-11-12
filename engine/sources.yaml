@@ -6,3 +6,5 @@ freshness_minutes:
   aca: 60
   aemet: 120
   euskalmet: 60
+  # Hidrosur publica la media de cada hora unos 40 min después (tabla "Datos actualizados a").
+  hidrosur: 120

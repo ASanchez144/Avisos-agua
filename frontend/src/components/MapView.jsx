@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { Camera } from 'lucide-react';
 import { MapContainer, Polygon, Polyline, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import { etaRangeText } from '../lib/format.js';
-import { statusMeta, WARNING_COLORS, worstStatus } from '../lib/status.js';
+import { ringGradient, statusMeta, WARNING_COLORS, worstAlert, worstStatus } from '../lib/status.js';
 
 const SPAIN = [[35.8, -9.6], [43.9, 4.4]];
 const SHAPE = { SIN_DATOS: 'hr-square', DATO_OBSOLETO: 'hr-square', SIN_UMBRAL: 'hr-diamond' };
@@ -39,12 +39,16 @@ const hasCoords = (p) => p && p.lat != null && p.lon != null;
 
 function clusterIcon(cluster) {
   const statuses = cluster.getAllChildMarkers().map((m) => m.options.status);
-  const worst = worstStatus(statuses);
-  const meta = statusMeta(worst);
-  const html = `<div class="hr-marker hr-cluster" style="background:${meta.color};color:${meta.text}">${renderToStaticMarkup(
-    <meta.Icon aria-hidden="true" />,
-  )}<span>${statuses.length}</span></div>`;
-  return L.divIcon({ html, className: '', iconSize: [40, 40], iconAnchor: [20, 20] });
+  // Anillo = reparto real de estados del grupo. El centro solo se colorea si hay un aviso
+  // (vigilancia, prealerta o alerta): una estación sin umbral o con dato antiguo no "apaga" a las demás,
+  // y un grupo nunca sale verde entero si no lo está.
+  const alert = worstAlert(statuses);
+  const meta = alert ? statusMeta(alert) : null;
+  const center = meta
+    ? `<span class="hr-cluster-core" style="background:${meta.color};color:${meta.text}">${renderToStaticMarkup(<meta.Icon aria-hidden="true" />)}${statuses.length}</span>`
+    : `<span class="hr-cluster-core">${statuses.length}</span>`;
+  const html = `<div class="hr-cluster-ring" style="background:${ringGradient(statuses)}">${center}</div>`;
+  return L.divIcon({ html, className: '', iconSize: [42, 42], iconAnchor: [21, 21] });
 }
 
 function clusterTitle(cluster) {
@@ -57,7 +61,7 @@ function clusterTitle(cluster) {
   return `${cluster.getChildCount()} estaciones: ${parts.join(', ')} (peor estado: ${statusMeta(worstStatus(cluster.getAllChildMarkers().map((m) => m.options.status))).label})`;
 }
 
-/** Marcadores agrupados (markercluster). El grupo toma el color del PEOR estado de sus estaciones. */
+/** Marcadores agrupados (markercluster). Anillo con el reparto de estados; centro con el peor aviso, si lo hay. */
 function ClusterLayer({ stations, selectedId, onSelect }) {
   const map = useMap();
   useEffect(() => {
