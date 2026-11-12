@@ -186,3 +186,30 @@ def test_planificador_ejecuta_cada_15_minutos(db):
     assert INTERVAL_MINUTES == 15
     assert len(jobs) == 1
     assert jobs[0].trigger.interval == timedelta(minutes=15)
+
+
+# ------------------------------------------------- nº de consultas (Neon tiene latencia de red)
+
+def _contar_consultas(db):
+    from sqlalchemy import event
+    n = {"q": 0}
+
+    @event.listens_for(db.engine, "before_cursor_execute")
+    def _(*args, **kw):
+        n["q"] += 1
+    return n
+
+
+def _consultas(db, ruta, n_estaciones):
+    db.record_success("t", [lectura(f"t:{i}") for i in range(n_estaciones)], started_at=T0, finished_at=T0)
+    n = _contar_consultas(db)
+    cliente(db).get(ruta)
+    return n["q"]
+
+
+@pytest.mark.parametrize("ruta", ["/stations", "/alerts"])
+def test_el_numero_de_consultas_no_crece_con_las_estaciones(tmp_path, ruta):
+    pocas = _consultas(Database(tmp_path / "a.sqlite"), ruta, 10)
+    muchas = _consultas(Database(tmp_path / "b.sqlite"), ruta, 150)
+    assert muchas == pocas, f"{ruta}: {pocas} consultas con 10 estaciones y {muchas} con 150"
+    assert muchas <= 16

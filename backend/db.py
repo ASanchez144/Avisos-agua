@@ -106,6 +106,19 @@ class Database:
             sa.func.coalesce(t_readings.c.timestamp_utc, t_readings.c.fetched_at_utc).desc(), t_readings.c.id.desc()], 1)
         return rows[0] if rows else None
 
+    def latest_all(self) -> dict[str, Reading]:
+        """Última lectura de TODAS las estaciones en UNA consulta (sin una consulta por estación)."""
+        rn = sa.func.row_number().over(
+            partition_by=t_readings.c.station_id,
+            order_by=[t_readings.c.fetched_at_utc.desc(),
+                      sa.func.coalesce(t_readings.c.timestamp_utc, t_readings.c.fetched_at_utc).desc(), t_readings.c.id.desc()],
+        ).label("rn")
+        ranked = sa.select(t_readings, rn).subquery()
+        q = (sa.select(ranked, t_stations.c.source, t_stations.c.name, t_stations.c.lat, t_stations.c.lon, t_stations.c.river)
+             .join(t_stations, t_stations.c.station_id == ranked.c.station_id).where(ranked.c.rn == 1))
+        with self.engine.connect() as conn:
+            return {row.station_id: self._to_reading(row) for row in conn.execute(q)}
+
     def history(self, station_id: str, limit: int = 100) -> list[Reading]:
         return self._readings(station_id, [
             sa.func.coalesce(t_readings.c.timestamp_utc, t_readings.c.fetched_at_utc).desc(), t_readings.c.id.desc()], limit)

@@ -141,3 +141,14 @@ def test_el_ciclo_purga_la_base_de_datos(db):
 
     run_cycle([Vacia()], db, now=lambda: T0)
     assert len(db.history("t:1")) == 1
+
+
+def test_latest_all_coincide_con_latest_de_cada_estacion(db):
+    for i in range(5):
+        for m in (30, 20, 10):
+            db.record_success("t", [lectura(f"t:{i}", minutes_ago=m, level_m=i + m / 100)], started_at=T0, finished_at=T0)
+    db.record_success("t", [lectura("t:9", quality="MISSING", timestamp_utc=None, flow_m3s=None, level_m=None)], started_at=T0, finished_at=T0)
+    todas = db.latest_all()
+    assert set(todas) == {s["station_id"] for s in db.stations()}
+    for sid, r in todas.items():
+        assert r == db.latest(sid)

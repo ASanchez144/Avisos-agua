@@ -293,6 +293,14 @@ def _estimate(table: LinkTable, link: Link, trigger: dict[str, Any], eta: Option
 def evaluate(table: LinkTable, history: History, now: datetime) -> list[dict[str, Any]]:
     """Estimaciones activas. Cada enlace disparado se propaga aguas abajo acumulando el rango
     mientras haya ETA; sin ETA (rambla o distancia sin verificar) se avisa solo de la subida."""
+    memo: dict[str, list[Reading]] = {}
+    raw_history = history
+
+    def history(station_id: str) -> list[Reading]:  # una sola consulta por estación en cada evaluación
+        if station_id not in memo:
+            memo[station_id] = raw_history(station_id)
+        return memo[station_id]
+
     best: dict[str, dict[str, Any]] = {}
     order: list[str] = []
     for link in table.links:

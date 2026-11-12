@@ -64,8 +64,8 @@ def create_app(
             cache[source] = run is None or run["ok"]
         return cache[source]
 
-    def view(station: dict[str, Any], cache: dict[str, bool]) -> dict[str, Any]:
-        latest = db.latest(station["station_id"])
+    def view(station: dict[str, Any], cache: dict[str, bool], latest_map: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+        latest = latest_map.get(station["station_id"]) if latest_map is not None else db.latest(station["station_id"])
         ok = source_ok(station["source"], cache)
         return {
             **station,
@@ -89,7 +89,8 @@ def create_app(
     @app.get("/stations")
     def stations() -> dict[str, Any]:
         cache: dict[str, bool] = {}
-        return envelope(stations=[view(s, cache) for s in db.stations()])
+        latest = db.latest_all() if hasattr(db, "latest_all") else None
+        return envelope(stations=[view(s, cache, latest) for s in db.stations()])
 
     @app.get("/stations/{station_id}/history")
     def history(station_id: str, limit: int = Query(100, ge=1, le=1000)) -> dict[str, Any]:
@@ -131,7 +132,8 @@ def create_app(
     @app.get("/alerts")
     def alerts() -> dict[str, Any]:
         cache: dict[str, bool] = {}
-        views = [view(s, cache) for s in db.stations()]
+        latest = db.latest_all() if hasattr(db, "latest_all") else None
+        views = [view(s, cache, latest) for s in db.stations()]
         over = sorted((v for v in views if v["status"] in SEVERITY), key=lambda v: (SEVERITY[v["status"]], v["station_id"]))
         return envelope(station_alerts=over, weather_warnings=weather_warnings(), propagation=propagation_now())
 
