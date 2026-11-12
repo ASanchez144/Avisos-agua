@@ -12,7 +12,7 @@ const TH = { yellow: 2, orange: 3, red: 4, variable: 'level_m' };
 
 const estimate = {
   link_id: 'x', origin: { name: 'Río Ejemplo en Cabecera' }, destination: { name: 'Río Ejemplo en Valle' },
-  trigger: { type: 'lluvia', value: 26, unit: 'mm/h' }, eta_hours_min: 3, eta_hours_max: 5,
+  trigger: { type: 'lluvia', value: 26, unit: 'mm/h' }, level: 'VIGILANCIA', eta_available: true, eta_hours_min: 3, eta_hours_max: 5, distance_is_lower_bound: true,
   distance_km: 40, distance_status: 'ESTIMADA', speed_status: 'ESTIMADA', label: 'estimación orientativa', via: [],
 };
 const quiet = { station_alerts: [], propagation: [], weather_warnings: { status: 'OK', source: 'AEMET', items: [] } };
@@ -38,6 +38,25 @@ describe('AlertBanner', () => {
     expect(banner).toHaveTextContent('estimación orientativa');
     expect(banner).toHaveTextContent('distancia ESTIMADA');
     expect(banner).not.toHaveTextContent(/\d{1,2}:\d{2}/); // nunca una hora exacta
+  });
+
+  it('avisa de que la distancia en línea recta es cota inferior y el ETA puede ser menor que el real', () => {
+    render(<AlertBanner alerts={{ ...quiet, propagation: [estimate] }} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('distancia en línea recta: la llegada real puede ser más tarde');
+  });
+
+  it('sin ETA (rambla sin referencia) avisa solo de la subida y no da horas', () => {
+    const sinEta = { ...estimate, eta_available: false, eta_hours_min: null, eta_hours_max: null, distance_km: null, distance_status: 'SIN_DISTANCIA', distance_is_lower_bound: false, level: 'ALERTA' };
+    render(<AlertBanner alerts={{ ...quiet, propagation: [sinEta] }} />);
+    const banner = screen.getByRole('alert');
+    expect(banner).toHaveTextContent('subida detectada en cabecera');
+    expect(banner).not.toHaveTextContent('llegada estimada');
+    expect(banner).not.toHaveTextContent(/\d+ horas/);
+  });
+
+  it('distingue vigilancia de alerta', () => {
+    render(<AlertBanner alerts={{ ...quiet, propagation: [{ ...estimate, level: 'ALERTA' }] }} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('ALERTA');
   });
 
   it('sin alertas no promete seguridad', () => {
@@ -95,6 +114,15 @@ describe('Freshness', () => {
     expect(screen.getByText('hace 12 min')).toBeInTheDocument();
     expect(screen.queryByRole('alert')).toBeNull();
   });
+  it('muestra la edad real y respeta el límite de la fuente', () => {
+    render(<Freshness timestamp="2026-11-11T10:35:00Z" now={NOW} limitMinutes={120} />);
+    expect(screen.getByText('hace 85 min')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+  it('con el límite de 60 min esa misma lectura ya es antigua y dice hace 85 min', () => {
+    render(<Freshness timestamp="2026-11-11T10:35:00Z" now={NOW} limitMinutes={60} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('hace 85 min');
+  });
   it('dato obsoleto: aviso visible', () => {
     render(<Freshness timestamp="2026-11-11T09:00:00Z" now={NOW} />);
     expect(screen.getByRole('alert')).toHaveTextContent('Dato antiguo');
@@ -124,6 +152,19 @@ describe('StationPanel', () => {
     render(<StationPanel station={station({ status: 'DATO_OBSOLETO' }, { timestamp_utc: '2026-11-11T08:00:00Z' })} history={[]} now={NOW} onClose={() => {}} />);
     expect(screen.getByRole('alert')).toHaveTextContent('Dato antiguo');
     expect(screen.getByText(/Última lectura conocida/)).toBeInTheDocument();
+  });
+
+  it('sin umbral publicado: estado propio y sin semáforo', () => {
+    render(<StationPanel station={station({ status: 'SIN_UMBRAL', threshold_note: 'umbral no publicado' }, { thresholds: null })} history={[]} now={NOW} onClose={() => {}} />);
+    expect(screen.getAllByText('Umbral no publicado').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Normal')).toBeNull();
+  });
+
+  it('usa el límite de frescura de la fuente del dato', () => {
+    const s = station({ status: 'NORMAL', fresh_limit_minutes: 120 }, { timestamp_utc: '2026-11-11T10:35:00Z' });
+    render(<StationPanel station={s} history={[]} now={NOW} onClose={() => {}} />);
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByText('hace 85 min')).toBeInTheDocument();
   });
 
   it('sin datos: no enseña valores', () => {

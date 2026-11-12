@@ -1,0 +1,7 @@
+# Frescura por fuente: minutos sin lectura nueva a partir de los cuales el dato es DATO_OBSOLETO.
+# AEMET publica el acumulado horario con más de una hora de retraso, de ahí 120.
+freshness_minutes:
+  default: 60
+  saih_cantabrico: 60
+  aca: 60
+  aemet: 120

@@ -139,7 +139,7 @@ def test_si_la_ultima_ejecucion_de_la_fuente_fallo_todo_es_sin_datos(db):
 def test_sin_umbral_oficial_la_api_dice_umbral_no_publicado(db):
     db.record_success("t", [lectura(thresholds=None)], started_at=T0, finished_at=T0)
     s = cliente(db).get("/stations/t:1").json()["station"]
-    assert s["status"] is None
+    assert s["status"] == "SIN_UMBRAL"
     assert s["threshold_note"] == "umbral no publicado"
 
 

@@ -96,9 +96,9 @@ def test_umbrales_parciales_solo_comparan_los_publicados():
     assert station_status(lectura(level_m=50.0, thresholds=th), NOW)["status"] == "VIGILANCIA"
 
 
-def test_sin_umbral_oficial_no_hay_semaforo():
+def test_sin_umbral_oficial_el_estado_es_sin_umbral_y_nunca_normal():
     s = station_status(lectura(thresholds=None), NOW)
-    assert s["status"] is None
+    assert s["status"] == "SIN_UMBRAL" != "SIN_DATOS"
     assert s["threshold_note"] == UMBRAL_NO_PUBLICADO == "umbral no publicado"
 
 
@@ -136,3 +136,20 @@ def test_variable_del_umbral_sin_valor_es_sin_datos():
 def test_umbrales_sin_variable_declarada_nunca_dan_verde():
     th = {"yellow": 2.0, "orange": 3.0, "red": 4.0}
     assert station_status(lectura(level_m=0.1, thresholds=th), NOW)["status"] == "SIN_DATOS"
+
+
+@pytest.mark.parametrize(
+    "source, minutos, esperado",
+    [("aemet", 100, "NORMAL"), ("aemet", 120, "NORMAL"), ("aemet", 121, "DATO_OBSOLETO"),
+     ("saih_cantabrico", 60, "NORMAL"), ("saih_cantabrico", 61, "DATO_OBSOLETO"),
+     ("aca", 61, "DATO_OBSOLETO"), ("fuente_nueva", 61, "DATO_OBSOLETO")],
+)
+def test_frescura_configurable_por_fuente(source, minutos, esperado):
+    r = lectura(source=source, timestamp_utc=NOW - timedelta(minutes=minutos))
+    assert station_status(r, NOW)["status"] == esperado
+
+
+def test_el_estado_informa_de_la_edad_real_y_del_limite_de_su_fuente():
+    s = station_status(lectura(source="aemet", timestamp_utc=NOW - timedelta(minutes=85)), NOW)
+    assert s["age_minutes"] == 85 and s["fresh_limit_minutes"] == 120
+    assert station_status(None, NOW)["age_minutes"] is None

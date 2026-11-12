@@ -6,14 +6,22 @@ const triggerText = (t) =>
     ? `lluvia intensa (${String(t.value).replace('.', ',')} litros por metro cuadrado en una hora)`
     : 'subida rápida del caudal';
 
+const LEVEL_TEXT = { ALERTA: 'ALERTA', VIGILANCIA: 'VIGILANCIA' };
+
 function Propagation({ estimate }) {
+  const badge = 'whitespace-nowrap rounded bg-black/30 px-1.5 py-0.5 text-xs font-bold';
   return (
     <li className="leading-snug">
-      <strong>{estimate.destination.name}</strong>: llegada estimada {etaRangeText(estimate.eta_hours_min, estimate.eta_hours_max)}
+      <span className={`${badge} mr-1`}>{LEVEL_TEXT[estimate.level] || 'VIGILANCIA'}</span>
+      <strong>{estimate.destination.name}</strong>:{' '}
+      {estimate.eta_available
+        ? `llegada estimada ${etaRangeText(estimate.eta_hours_min, estimate.eta_hours_max)}`
+        : 'subida detectada en cabecera, sin estimación de llegada'}
       {' '}por {triggerText(estimate.trigger)} en {estimate.origin.name}.{' '}
-      <span className="whitespace-nowrap rounded bg-black/30 px-1.5 py-0.5 text-xs font-bold">{estimate.label}</span>{' '}
-      {estimate.distance_status === 'ESTIMADA' && (
-        <span className="whitespace-nowrap rounded bg-black/30 px-1.5 py-0.5 text-xs font-bold">distancia ESTIMADA</span>
+      {estimate.eta_available && <span className={badge}>{estimate.label}</span>}{' '}
+      {estimate.eta_available && estimate.distance_status === 'ESTIMADA' && <span className={badge}>distancia ESTIMADA</span>}{' '}
+      {estimate.eta_available && estimate.distance_is_lower_bound && (
+        <span className={badge}>distancia en línea recta: la llegada real puede ser más tarde</span>
       )}
     </li>
   );
@@ -42,7 +50,7 @@ export default function AlertBanner({ alerts, error = false }) {
   const hasWeather = weather?.status === 'OK' && weather.items.length > 0;
   const active = propagation.length > 0 || stationAlerts.length > 0 || hasWeather;
   const redWarning = hasWeather && weather.items.some((w) => w.level === 'rojo');
-  const worst = stationAlerts.some((s) => s.status === 'ALERTA') || propagation.length > 0 || redWarning;
+  const worst = stationAlerts.some((s) => s.status === 'ALERTA') || propagation.some((e) => e.level === 'ALERTA') || redWarning;
 
   if (!active) {
     return (

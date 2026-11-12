@@ -70,7 +70,7 @@ export default function StationPanel({ station, history, now = new Date(), demo 
           </p>
         ) : (
           <>
-            <Freshness timestamp={latest.timestamp_utc} now={now} />
+            <Freshness timestamp={latest.timestamp_utc} now={now} limitMinutes={station.fresh_limit_minutes ?? 60} />
             {obsolete && <p className="text-sm font-bold uppercase tracking-wide text-amber-200">Última lectura conocida (no es la situación actual)</p>}
             {latest.quality === 'SUSPECT' && (
               <p className="rounded-lg border border-slate-500 bg-slate-800 p-2 text-sm text-slate-200">

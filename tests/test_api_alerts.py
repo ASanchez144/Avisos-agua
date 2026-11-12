@@ -78,8 +78,9 @@ def test_si_falla_la_descarga_de_avisos_el_estado_pasa_a_sin_datos(db):
 
 
 def test_alerts_incluye_la_propagacion_activa(db):
-    guarda(db, lectura("saih_cantabrico:1424", minutes_ago=65, flow_m3s=10.0, thresholds=None),
-           lectura("saih_cantabrico:1424", minutes_ago=5, flow_m3s=20.0, thresholds=None))
+    k = "saih_cantabrico:1424"
+    guarda(db, lectura(k, minutes_ago=80, flow_m3s=10.0, thresholds=None), lectura(k, minutes_ago=65, flow_m3s=12.0, thresholds=None),
+           lectura(k, minutes_ago=20, flow_m3s=15.0, thresholds=None), lectura(k, minutes_ago=5, flow_m3s=18.0, thresholds=None))
     body = cliente(db).get("/alerts").json()
     assert [p["link_id"] for p in body["propagation"]] == ["eo-ribera-pontenova", "eo-pontenova-santirso"]
     assert body["propagation"][0]["label"] == "estimación orientativa"
@@ -93,13 +94,15 @@ def test_propagation_devuelve_tabla_de_enlaces_con_marcas_de_estimada(db):
     assert body["active"] == []
     ids = [l["link_id"] for l in body["links"]]
     assert "aragon-jaca-yesa" in ids and "poyo-aforo-paiporta" in ids
-    assert all(l["distance_status"] == "ESTIMADA" and l["distance_source"] for l in body["links"])
-    assert all(l["eta_hours_min"] < l["eta_hours_max"] for l in body["links"])
-    assert body["triggers"]["rain_mm_h"] == 20.0 and body["triggers"]["flow_rise_pct_1h"] == 30.0
+    assert all(l["distance_status"] in ("ESTIMADA", "SIN_DISTANCIA") and l["distance_source"] for l in body["links"])
+    assert all(l["eta_hours_min"] < l["eta_hours_max"] for l in body["links"] if l["eta_available"])
+    assert [l["link_id"] for l in body["links"] if not l["eta_available"]] == ["poyo-chiva-aforo", "poyo-aforo-paiporta"]
+    assert body["triggers"]["levels"]["VIGILANCIA"]["rain_mm_h"] == 20.0 and body["triggers"]["consecutive_readings"] == 2
 
 
 def test_propagation_activa_por_lluvia_en_estacion_aemet_enlazada(db):
-    guarda(db, lectura("aemet:9201X", minutes_ago=70, level_m=None, rain_1h_mm=32.5, thresholds=None))
+    guarda(db, lectura("aemet:9201X", minutes_ago=130, level_m=None, rain_1h_mm=30.0, thresholds=None),
+           lectura("aemet:9201X", minutes_ago=70, level_m=None, rain_1h_mm=32.5, thresholds=None))
     activos = cliente(db).get("/propagation").json()["active"]
     assert activos[0]["link_id"] == "aragon-jaca-yesa"
     assert activos[0]["trigger"]["type"] == "lluvia" and activos[0]["trigger"]["station_id"] == "aemet:9201X"

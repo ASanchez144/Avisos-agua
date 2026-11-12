@@ -38,7 +38,7 @@ def test_las_estaciones_demo_no_pueden_confundirse_con_reales():
 
 def test_la_demo_ensena_todos_los_estados_posibles():
     estados = {s["status"] for s in demo().get("/stations").json()["stations"]}
-    assert estados == {"NORMAL", "VIGILANCIA", "PREALERTA", "ALERTA", "SIN_DATOS", "DATO_OBSOLETO", None}
+    assert estados == {"NORMAL", "VIGILANCIA", "PREALERTA", "ALERTA", "SIN_DATOS", "DATO_OBSOLETO", "SIN_UMBRAL"}
 
 
 def test_la_demo_tiene_historico_con_lluvia_y_caudal_reciente():

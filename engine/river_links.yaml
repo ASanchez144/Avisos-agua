@@ -13,11 +13,19 @@
 #   SAI-CHC     = visor oficial del SAI Cantábrico.
 
 triggers:
-  rain_mm_h: 20.0            # lluvia en cabecera (mm en 1 h)
-  flow_rise_pct_1h: 30.0     # subida de caudal en 1 h (%)
-  min_flow_m3s: 1.0          # caudal mínimo para considerar una subida (evita ruido en cauces casi secos). Parámetro del proyecto.
-  max_age_minutes: 120       # antigüedad máxima del dato que dispara (AEMET publica el acumulado horario con ~1 h de retraso)
+  consecutive_readings: 2    # lecturas consecutivas que deben cumplir la condición (evita un pico suelto)
+  max_age_minutes: 120       # antigüedad máxima de la última lectura (AEMET publica el horario con ~1 h de retraso)
   hour_tolerance_minutes: 15 # margen para encontrar la lectura de "hace 1 h"
+  max_gap_minutes: 90        # separación máxima entre lecturas consecutivas
+  # Dos niveles. Valores calibrados con la DANA del 29/10/2024: ver docs/CALIBRATION.md
+  vigilancia:
+    rain_mm_h: 20.0
+    flow_rise_pct_1h: 30.0
+    min_flow_m3s: 5.0
+  alerta:
+    rain_mm_h: 40.0
+    flow_rise_pct_1h: 100.0
+    min_flow_m3s: 50.0
 
 regimes:
   rio:
@@ -29,13 +37,14 @@ regimes:
       crecida según la pendiente. No está contrastado con medidas de cada tramo: se usa el rango
       completo y por eso la llegada se da siempre como intervalo.
   rambla:
-    speed_kmh_min: 10.0
-    speed_kmh_max: 20.0
-    status: ESTIMADA
+    speed_kmh_min: null
+    speed_kmh_max: null
+    status: SIN_REFERENCIA
     source: >-
-      Supuesto del proyecto SIN fuente verificada: barrancos y ramblas mediterráneos (cauce seco,
-      más pendiente) responden mucho más rápido que un río. Pendiente de contrastar con la CHJ o
-      el CEDEX. El episodio real del 29/10/2024 (un solo aforo) no permite medir la velocidad.
+      Sin referencia verificable para la velocidad de la onda en barrancos y ramblas mediterráneos
+      (no se ha encontrado ninguna fuente citable). Por eso NO se da rango horario: solo aviso
+      cualitativo "subida detectada en cabecera". Si se localiza una fuente (CHJ, CEDEX), se
+      rellenan speed_kmh_min/max aquí.
 
 links:
   - id: aragon-jaca-yesa
@@ -70,10 +79,11 @@ links:
     regime: rambla
     origin: {station_id: null, name: "Barranco del Poyo, cabecera (Chiva)", lat: null, lon: null, coord_source: "sin coordenadas verificadas"}
     destination: {station_id: "saih_jucar:rambla_poyo", name: "Aforo de la Rambla del Poyo", lat: 39.47537, lon: -0.5818, coord_source: "MITECO-SAIH 'AFORO RAMBLA POYO'"}
-    distance_km: 16.0
-    distance_source: >-
-      Cifra del proyecto SIN fuente verificada (Chiva -> aforo). Único dato contrastado: el cauce
-      completo mide 43,5 km según el CEDEX (citado por Wikipedia), que es la cota superior.
+    no_distance: >-
+      Sin distancia verificada. Se intentó calcular la longitud del cauce con OpenStreetMap
+      (Overpass) y con ArcGIS Online, pero ambos eran inalcanzables desde el entorno de desarrollo
+      (BLOQUEADO_POR_ENTORNO). Único dato contrastado: el cauce completo mide 43,5 km según el CEDEX
+      (citado por Wikipedia). Ejecuta scripts/measure_channel.py desde tu PC para calcularla.
     note: "Sin estación en cabecera ni datos en vivo (SAIH Júcar rechaza el acceso automatizado): hoy este enlace no puede dispararse."
 
   - id: poyo-aforo-paiporta
@@ -81,10 +91,9 @@ links:
     regime: rambla
     origin: {station_id: "saih_jucar:rambla_poyo", name: "Aforo de la Rambla del Poyo", lat: 39.47537, lon: -0.5818, coord_source: "MITECO-SAIH 'AFORO RAMBLA POYO'"}
     destination: {station_id: null, name: "Paiporta (núcleo urbano)", lat: null, lon: null, coord_source: "sin coordenadas verificadas"}
-    distance_km: 14.0
-    distance_source: >-
-      Cifra del proyecto SIN fuente verificada (aforo -> Paiporta). Cota superior contrastada:
-      43,5 km de longitud total del cauce según el CEDEX (citado por Wikipedia).
+    no_distance: >-
+      Sin distancia verificada (misma razón que poyo-chiva-aforo). Ejecuta scripts/measure_channel.py
+      desde tu PC para calcularla con la geometría de OpenStreetMap.
     note: "Sin datos en vivo (SAIH Júcar rechaza el acceso automatizado). Probado con el hidrograma real del 29/10/2024."
 
   - id: eo-ribera-pontenova

@@ -14,7 +14,12 @@ describe('freshness', () => {
   const now = new Date('2026-11-11T12:00:00Z');
   it('minutos', () => expect(freshness('2026-11-11T11:48:00Z', now)).toEqual({ text: 'hace 12 min', minutes: 12, stale: false }));
   it('recién llegado', () => expect(freshness('2026-11-11T11:59:40Z', now).text).toBe('hace menos de 1 min'));
-  it('más de 60 min es dato antiguo', () => expect(freshness('2026-11-11T10:30:00Z', now)).toEqual({ text: 'hace 1 h 30 min', minutes: 90, stale: true }));
+  it('muestra la edad real en minutos: hace 85 min', () => expect(freshness('2026-11-11T10:35:00Z', now)).toEqual({ text: 'hace 85 min', minutes: 85, stale: true }));
+  it('el límite depende de la fuente (AEMET 120 min)', () => {
+    expect(freshness('2026-11-11T10:35:00Z', now, 120).stale).toBe(false);
+    expect(freshness('2026-11-11T09:55:00Z', now, 120).stale).toBe(true);
+  });
+  it('horas a partir de 3 h', () => expect(freshness('2026-11-11T08:30:00Z', now).text).toBe('hace 3 h 30 min'));
   it('días', () => expect(freshness('2026-11-08T12:00:00Z', now).text).toBe('hace 3 días'));
   it('sin fecha', () => expect(freshness(null, now)).toEqual({ text: 'sin fecha de medida', minutes: null, stale: true }));
 });

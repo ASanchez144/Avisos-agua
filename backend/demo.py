@@ -15,7 +15,7 @@ from fastapi import FastAPI
 
 from backend.app import DEMO_NOTICE, create_app
 from connectors.base import Reading, iso_utc
-from engine.propagation import ESTIMADA, Link, LinkTable, Point, Regime, Triggers
+from engine.propagation import ESTIMADA, LevelCfg, Link, LinkTable, Point, Regime, Triggers
 from engine.geo import haversine_km
 
 SOURCE = "demo"
@@ -130,11 +130,12 @@ def demo_links() -> LinkTable:
         links.append(Link(
             id=f"demo-{a.split(':')[1]}-{b.split(':')[1]}", river="DEMO · Río Ejemplo", regime="rio",
             origin=Point(name=na, station_id=a, lat=la, lon=lo), destination=Point(name=nb, station_id=b, lat=lb, lon=lob),
-            distance_km=round(haversine_km(la, lo, lb, lob), 1), distance_status=ESTIMADA,
+            distance_km=round(haversine_km(la, lo, lb, lob), 1), distance_status=ESTIMADA, lower_bound=True,
             distance_source="DEMO · distancia de ejemplo", note="DEMO · enlace de ejemplo",
         ))
     return LinkTable(
-        triggers=Triggers(rain_mm_h=20.0, flow_rise_pct_1h=30.0, min_flow_m3s=1.0, max_age_minutes=120, hour_tolerance_minutes=15),
+        triggers=Triggers(consecutive_readings=2, max_age_minutes=120, hour_tolerance_minutes=15, max_gap_minutes=90,
+                          levels={"VIGILANCIA": LevelCfg(20.0, 30.0, 5.0), "ALERTA": LevelCfg(40.0, 100.0, 50.0)}),
         regimes={"rio": Regime(6.0, 14.0, ESTIMADA, "DEMO · rango de ejemplo 6-14 km/h")},
         links=tuple(links),
     )

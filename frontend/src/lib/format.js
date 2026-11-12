@@ -21,13 +21,13 @@ export function etaRangeText(minHours, maxHours) {
   return `entre ${hoursText(lo)} y ${hoursText(hi)} ${unit}`;
 }
 
-/** "hace 12 min". stale = más de 60 min (dato antiguo) o sin fecha. */
-export function freshness(timestampUtc, now = new Date()) {
+/** "hace 85 min" (edad real). stale = más antiguo que el límite de SU fuente (60 por defecto) o sin fecha. */
+export function freshness(timestampUtc, now = new Date(), limitMinutes = 60) {
   if (!timestampUtc) return { text: 'sin fecha de medida', minutes: null, stale: true };
   const minutes = Math.max(0, Math.floor((now.getTime() - new Date(timestampUtc).getTime()) / 60000));
   let text;
   if (minutes < 1) text = 'hace menos de 1 min';
-  else if (minutes < 60) text = `hace ${minutes} min`;
+  else if (minutes < 180) text = `hace ${minutes} min`;
   else if (minutes < 24 * 60) {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
@@ -36,7 +36,7 @@ export function freshness(timestampUtc, now = new Date()) {
     const d = Math.floor(minutes / (24 * 60));
     text = `hace ${d} ${d === 1 ? 'día' : 'días'}`;
   }
-  return { text, minutes, stale: minutes > 60 };
+  return { text, minutes, stale: minutes > limitMinutes };
 }
 
 export const OLYMPIC_POOL_M3 = 2500;

@@ -17,6 +17,10 @@ export default function Legend() {
           </li>
         ))}
         <li className="flex items-center gap-2">
+          <span aria-hidden="true" className="flex h-7 w-9 items-center justify-center rounded-full border-2 border-slate-900 bg-slate-300 text-xs font-extrabold text-slate-900">12</span>
+          Grupo de estaciones: lleva el color del PEOR estado
+        </li>
+        <li className="flex items-center gap-2">
           <span aria-hidden="true" className="w-9 border-t-4 border-dashed border-orange-500" />
           Crecida en camino (estimación)
         </li>
