@@ -155,3 +155,16 @@ def test_stations_marca_las_que_tienen_camara(db):
             return None
     st = {s["station_id"]: s["has_camera"] for s in TestClient(create_app(db, now=lambda: NOW, sai_cameras=Fake())).get("/stations").json()["stations"]}
     assert st == {"saih_cantabrico:1424": True, "aca:1": False}
+
+
+def test_el_detalle_de_estacion_tambien_dice_si_tiene_camara(db):
+    db.record_success("t", [Reading("saih_cantabrico:1424", "saih_cantabrico", "Ribera", 43.18, -7.2, "Eo", 0.7, 0.14, None, None, None, None, None, NOW - timedelta(minutes=5), NOW, "OK")], NOW, NOW)
+
+    class Fake:
+        def station_ids(self):
+            return {"saih_cantabrico:1424"}
+
+        def camera(self, sid):
+            return None
+    body = TestClient(create_app(db, now=lambda: NOW, sai_cameras=Fake())).get("/stations/saih_cantabrico:1424").json()
+    assert body["station"]["has_camera"] is True

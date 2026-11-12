@@ -112,7 +112,7 @@ def create_app(
 
     @app.get("/stations/{station_id}")
     def station(station_id: str) -> dict[str, Any]:
-        return envelope(station=view(find(station_id), {}))
+        return envelope(station=view(find(station_id), {}, None, camera_ids()))
 
     @app.get("/stations/{station_id}/camera")
     def station_camera(station_id: str) -> dict[str, Any]:
