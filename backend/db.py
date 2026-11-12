@@ -17,7 +17,7 @@ from alembic.config import Config
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
-from backend.models import readings as t_readings, request_log, source_runs, stations as t_stations, warnings as t_warnings
+from backend.models import camera_cache, readings as t_readings, request_log, source_runs, stations as t_stations, warnings as t_warnings
 from connectors.base import Reading, iso_utc, parse_iso_utc
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -58,21 +58,32 @@ class Database:
 
     # --------------------------------------------------------------- escritura
     def record_success(self, source: str, readings: list[Reading], started_at: datetime, finished_at: datetime) -> None:
+        """Guarda lecturas en LOTES (pocas idas y vueltas: importa contra Neon desde Vercel/Actions)."""
+        stations: dict[str, dict[str, Any]] = {}
+        rows: dict[tuple[str, Optional[str]], dict[str, Any]] = {}
+        for r in readings:
+            stations[r.station_id] = dict(station_id=r.station_id, source=r.source, name=r.name, lat=r.lat, lon=r.lon, river=r.river)
+            ts = iso_utc(r.timestamp_utc)
+            rows[(r.station_id, ts)] = dict(
+                station_id=r.station_id, timestamp_utc=ts, fetched_at_utc=iso_utc(r.fetched_at_utc),
+                flow_m3s=r.flow_m3s, level_m=r.level_m, rain_1h_mm=r.rain_1h_mm, rain_24h_mm=r.rain_24h_mm,
+                reservoir_pct=r.reservoir_pct, reservoir_hm3=r.reservoir_hm3,
+                thresholds=json.dumps(r.thresholds) if r.thresholds else None, quality=r.quality)
         with self.engine.begin() as conn:
-            for r in readings:
-                ins = self._insert(t_stations).values(
-                    station_id=r.station_id, source=r.source, name=r.name, lat=r.lat, lon=r.lon, river=r.river)
+            if stations:
+                ins = self._insert(t_stations)
                 conn.execute(ins.on_conflict_do_update(
-                    index_elements=["station_id"],
-                    set_={c: ins.excluded[c] for c in ("source", "name", "lat", "lon", "river")}))
-                ins = self._insert(t_readings).values(
-                    station_id=r.station_id, timestamp_utc=iso_utc(r.timestamp_utc), fetched_at_utc=iso_utc(r.fetched_at_utc),
-                    flow_m3s=r.flow_m3s, level_m=r.level_m, rain_1h_mm=r.rain_1h_mm, rain_24h_mm=r.rain_24h_mm,
-                    reservoir_pct=r.reservoir_pct, reservoir_hm3=r.reservoir_hm3,
-                    thresholds=json.dumps(r.thresholds) if r.thresholds else None, quality=r.quality)
+                    index_elements=["station_id"], set_={c: ins.excluded[c] for c in ("source", "name", "lat", "lon", "river")}),
+                    list(stations.values()))
+            with_ts = [v for (sid, ts), v in rows.items() if ts is not None]
+            without_ts = [v for (sid, ts), v in rows.items() if ts is None]
+            if with_ts:
+                ins = self._insert(t_readings)
                 # misma lectura vista otra vez: no se duplica, solo se anota que sigue vigente
                 conn.execute(ins.on_conflict_do_update(
-                    index_elements=["station_id", "timestamp_utc"], set_={"fetched_at_utc": ins.excluded.fetched_at_utc}))
+                    index_elements=["station_id", "timestamp_utc"], set_={"fetched_at_utc": ins.excluded.fetched_at_utc}), with_ts)
+            if without_ts:  # lecturas sin fecha (MISSING): NULL no choca con la restricción única
+                conn.execute(t_readings.insert(), without_ts)
             conn.execute(source_runs.insert().values(
                 source=source, started_at_utc=iso_utc(started_at), finished_at_utc=iso_utc(finished_at),
                 ok=1, n_readings=len(readings), error=None))
@@ -184,3 +195,14 @@ class Database:
         with self.engine.begin() as conn:
             ins = self._insert(request_log).values(key=key, last_request_utc=iso_utc(at))
             conn.execute(ins.on_conflict_do_update(index_elements=["key"], set_={"last_request_utc": ins.excluded.last_request_utc}))
+
+    # ----------------------------------------------------------- caché de cámaras
+    def camera_cache_get(self, code: str) -> Optional[tuple[datetime, dict[str, Any]]]:
+        with self.engine.connect() as conn:
+            row = conn.execute(sa.select(camera_cache).where(camera_cache.c.code == code)).first()
+        return (parse_iso_utc(row.fetched_at_utc), json.loads(row.payload)) if row else None
+
+    def camera_cache_put(self, code: str, payload: dict[str, Any], at: datetime) -> None:
+        with self.engine.begin() as conn:
+            ins = self._insert(camera_cache).values(code=code, payload=json.dumps(payload), fetched_at_utc=iso_utc(at))
+            conn.execute(ins.on_conflict_do_update(index_elements=["code"], set_={"payload": ins.excluded.payload, "fetched_at_utc": ins.excluded.fetched_at_utc}))

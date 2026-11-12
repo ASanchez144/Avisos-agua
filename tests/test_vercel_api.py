@@ -45,6 +45,18 @@ def test_modo_demo_en_vercel(monkeypatch):
     assert body["demo"] is True and body["demo_notice"] == "DATOS DE DEMOSTRACIÓN"
 
 
-def test_no_importa_el_planificador():
+def test_no_arranca_un_planificador_permanente():
     text = (ROOT / "api" / "index.py").read_text()
-    assert "scheduler" not in text.lower() and "apscheduler" not in text.lower()
+    assert "apscheduler" not in text.lower() and "build_scheduler" not in text
+
+
+def test_collect_con_datos_recientes_no_hace_nada(monkeypatch, tmp_path):
+    from datetime import datetime, timezone
+    from backend.db import Database
+    db = Database(tmp_path / "v.sqlite")
+    t = datetime.now(timezone.utc)
+    for s in ("saih_cantabrico", "aca", "aemet"):
+        db.record_failure(s, "x", started_at=t, finished_at=t)
+    mod = cargar(monkeypatch, DATABASE_URL=str(tmp_path / "v.sqlite"))
+    body = TestClient(mod.app).post("/api/collect").json()
+    assert body["ran"] is False and body["reason"] == "datos recientes"

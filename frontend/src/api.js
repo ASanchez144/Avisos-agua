@@ -7,7 +7,14 @@ async function get(path) {
   return response.json();
 }
 
+async function post(path) {
+  const response = await fetch(`${BASE}${path}`, { method: 'POST', headers: { Accept: 'application/json' } });
+  if (!response.ok) throw new Error(`HTTP ${response.status} en ${path}`);
+  return response.json();
+}
+
 export const api = {
+  collect: () => post('/collect'),
   stations: () => get('/stations'),
   station: (id) => get(`/stations/${encodeURIComponent(id)}`),
   history: (id, limit = 150) => get(`/stations/${encodeURIComponent(id)}/history?limit=${limit}`),

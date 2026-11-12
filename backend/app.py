@@ -10,7 +10,8 @@ from fastapi import FastAPI, HTTPException, Query
 
 from backend.cameras import CameraChecker
 from backend.db import Database
-from connectors.base import iso_utc
+from connectors.saih_cantabrico_cameras import SaiCameraService
+from connectors.base import iso_utc, parse_iso_utc
 from engine.cameras import CameraConfig, load_cameras
 from engine.geo import haversine_km
 from engine.propagation import LABEL, LinkTable, describe_links, evaluate, load_links
@@ -34,11 +35,14 @@ def _utcnow() -> datetime:
 def create_app(
     db: Any, now: Callable[[], datetime] = _utcnow, lifespan: Any = None, links: Optional[LinkTable] = None,
     demo: bool = False, cameras: Optional[CameraConfig] = None, camera_checker: Optional[CameraChecker] = None,
+    sai_cameras: Any = None, collector: Optional[Callable[[], dict[str, Any]]] = None,
+    collector_sources: tuple[str, ...] | list[str] = (), collect_every_minutes: int = 14,
 ) -> FastAPI:
     app = FastAPI(title="HidroRed España", description=DISCLAIMER, lifespan=lifespan)
     table = links or load_links(DEFAULT_LINKS)
     camera_cfg = cameras or (CameraConfig(3.0, 20, ()) if demo else load_cameras(DEFAULT_CAMERAS))
     checker = camera_checker or CameraChecker(stale_after_minutes=camera_cfg.stale_after_minutes)
+    sai = sai_cameras if sai_cameras is not None else (None if demo else SaiCameraService(db))
 
     def propagation_now() -> list[dict[str, Any]]:
         return evaluate(table, lambda station_id: db.history(station_id, limit=HISTORY_FOR_TRIGGERS), now())
@@ -113,12 +117,17 @@ def create_app(
                 cam = None
         else:
             distance = None
+        if cam is None and sai is not None:
+            official = sai.camera(station_id)  # cámara oficial en la propia estación de aforo
+            if official is not None:
+                return envelope(camera=official)
         if cam is None:
             return envelope(camera=None, reason="No hay ninguna cámara verificada a menos de "
                             f"{camera_cfg.max_distance_km:g} km que enfoque el cauce o el puente.")
         return envelope(camera={
             "id": cam.id, "image_url": cam.image_url, "origin_url": cam.origin_url, "distance_km": round(distance, 2),
             "focus_verified": True, "verified_by": cam.verified_by, "refresh_seconds": CAMERA_REFRESH_SECONDS,
+            "kind": "trafico", "source_label": "Cámara de tráfico de la DGT",
             "status": checker.status(cam.image_url),
         })
 
@@ -128,6 +137,26 @@ def create_app(
         if cam is None:
             raise HTTPException(status_code=404, detail="cámara no encontrada")
         return envelope(camera_id=camera_id, **checker.status(cam.image_url))
+
+    @app.post("/collect")
+    def collect() -> dict[str, Any]:
+        """Lanza un ciclo de recogida si los datos tienen más de ~15 min. Respaldo del cron: la propia web lo
+        pide al abrirse. Seguro ante abusos: el límite de 1 petición/15 min por recurso está en la base de datos."""
+        if collector is None:
+            return envelope(ran=False, reason="recogida no disponible en este despliegue")
+        current = now()
+        ages = []
+        for source in collector_sources:
+            run = db.last_run(source)
+            finished = parse_iso_utc(run["finished_at_utc"]) if run else None
+            ages.append(None if finished is None else int((current - finished).total_seconds() // 60))
+        if ages and all(a is not None and a < collect_every_minutes for a in ages):
+            return envelope(ran=False, reason="datos recientes", oldest_minutes=max(ages))
+        try:
+            summary = collector()
+        except Exception as exc:  # la API sigue respondiendo aunque falle la recogida
+            return envelope(ran=False, reason=f"{type(exc).__name__}: la recogida falló")
+        return envelope(ran=True, summary=summary)
 
     @app.get("/alerts")
     def alerts() -> dict[str, Any]:

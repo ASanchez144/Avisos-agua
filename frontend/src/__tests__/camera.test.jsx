@@ -35,11 +35,18 @@ describe('CameraView (solo ver, sin análisis)', () => {
     const img = screen.getByRole('img', { name: /cámara de tráfico/i });
     expect(img.getAttribute('src')).toMatch(/^https:\/\/etraffic\.dgt\.es\/camarasEtraffic\/112\.jpg\?_=/);
     expect(img).toHaveAttribute('referrerpolicy', 'no-referrer');
-    expect(screen.getByText(/actualizada hace 4 min/i)).toBeInTheDocument();
+    expect(screen.getByText(/foto hace 4 min/i)).toBeInTheDocument();
     expect(screen.getByText(/a 0,8 km/)).toBeInTheDocument();
     const link = screen.getByRole('link', { name: /ver en el origen/i });
     expect(link).toHaveAttribute('href', 'https://infocar.dgt.es/etraffic/');
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+  });
+
+  it('cámara oficial de aforo: lo dice y enlaza a la confederación', async () => {
+    await mount(camera({}, { kind: 'aforo', image_url: 'https://visor.saichcantabrico.es/meteorologia-files/camaras/1424EO/202611121240.jpg', origin_url: 'https://visor.saichcantabrico.es/' }));
+    expect(screen.getByRole('img', { name: /enfoca el río/i })).toBeInTheDocument();
+    expect(screen.getByText(/cámara oficial en la propia estación de aforo/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /CH Cantábrico/ })).toHaveAttribute('href', 'https://visor.saichcantabrico.es/');
   });
 
   it('imagen antigua: "Cámara sin señal" y NINGUNA imagen', async () => {

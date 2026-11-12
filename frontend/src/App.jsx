@@ -43,12 +43,23 @@ export default function App() {
     }
   }, []);
 
+  // Respaldo del cron: si los datos tienen más de ~15 min, el servidor hace un ciclo y luego se refresca.
+  const collect = useCallback(async () => {
+    try {
+      const r = await api.collect();
+      if (r.ran) refresh();
+    } catch {
+      /* si falla, se siguen mostrando los datos con su edad real */
+    }
+  }, [refresh]);
+
   useEffect(() => {
     refresh();
-    const data = setInterval(refresh, REFRESH_MS);
+    collect();
+    const data = setInterval(() => { refresh(); collect(); }, REFRESH_MS);
     const clock = setInterval(() => setNow(new Date()), 30 * 1000);
     return () => { clearInterval(data); clearInterval(clock); };
-  }, [refresh]);
+  }, [refresh, collect]);
 
   useEffect(() => {
     if (!selectedId) { setDetail(null); return undefined; }

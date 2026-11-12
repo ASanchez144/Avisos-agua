@@ -42,7 +42,7 @@ export default function CameraView({ stationId, now = new Date() }) {
   const header = (
     <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-slate-300">
       <Camera aria-hidden="true" className="h-4 w-4" />
-      Cámara cercana
+      {state.camera?.kind === 'aforo' ? 'Cámara del río' : 'Cámara cercana'}
     </h3>
   );
   if (state.phase === 'cargando') return null;
@@ -78,17 +78,19 @@ export default function CameraView({ stationId, now = new Date() }) {
       {header}
       <img
         src={`${cam.image_url}?_=${tick}`}
-        alt="Imagen en directo de la cámara de tráfico más cercana a la estación"
+        alt={cam.kind === 'aforo' ? 'Imagen de la cámara oficial que enfoca el río en la estación de aforo' : 'Imagen en directo de la cámara de tráfico más cercana a la estación'}
         referrerPolicy="no-referrer"
         loading="lazy"
         onError={() => setImageFailed(true)}
         className="mt-2 w-full rounded-lg bg-black"
       />
       <p className="mt-1 text-sm text-slate-300">
-        Actualizada {age.text} · a {num(cam.distance_km, 1)} km de la estación. Es una cámara de tráfico: solo para ver, sin análisis.
+        Foto {age.text}
+        {cam.kind === 'aforo' ? ' · cámara oficial en la propia estación de aforo.' : ` · a ${num(cam.distance_km, 1)} km de la estación (cámara de tráfico).`}
+        {' '}Solo para ver, sin análisis.
       </p>
       <a href={cam.origin_url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm text-sky-300 underline">
-        Ver en el origen (DGT) <ExternalLink aria-hidden="true" className="h-3.5 w-3.5" />
+        Ver en el origen ({cam.kind === 'aforo' ? 'CH Cantábrico' : 'DGT'}) <ExternalLink aria-hidden="true" className="h-3.5 w-3.5" />
       </a>
     </section>
   );

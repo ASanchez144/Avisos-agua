@@ -43,3 +43,9 @@ request_log = sa.Table(  # límite de 1 petición/15 min por recurso, persistent
     sa.Column("key", sa.Text, primary_key=True),
     sa.Column("last_request_utc", sa.Text, nullable=False),
 )
+camera_cache = sa.Table(  # última respuesta de la cámara de cada estación (1 petición/15 min)
+    "camera_cache", metadata,
+    sa.Column("code", sa.Text, primary_key=True),
+    sa.Column("payload", sa.Text, nullable=False),
+    sa.Column("fetched_at_utc", sa.Text, nullable=False),
+)

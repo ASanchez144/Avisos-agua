@@ -24,15 +24,19 @@ def database_url() -> str:
     return os.environ.get("DATABASE_URL") or os.environ.get("HIDRORED_DB") or "data/hidrored.sqlite"
 
 
+def build_connectors(db: Database, include_aemet: bool = True) -> list:
+    client = PoliteHttpClient(store=db)
+    connectors = [SaihCantabricoConnector(client), AcaConnector(client)]
+    return connectors + [AemetConnector(client)] if include_aemet else connectors
+
+
 def main() -> int:
     try:
         db = Database(database_url())
     except Exception as exc:  # sin base de datos no hay nada que hacer
         logging.error("no se pudo abrir la base de datos: %s: %s", type(exc).__name__, type(exc).__doc__ or exc)
         return 1
-    client = PoliteHttpClient(store=db)
-    connectors = [SaihCantabricoConnector(client), AcaConnector(client), AemetConnector(client)]
-    summary = run_cycle(connectors, db)
+    summary = run_cycle(build_connectors(db), db)
     print(json.dumps(summary, ensure_ascii=False, indent=1))
     return 0
 

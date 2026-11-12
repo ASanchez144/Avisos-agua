@@ -152,3 +152,12 @@ def test_latest_all_coincide_con_latest_de_cada_estacion(db):
     assert set(todas) == {s["station_id"] for s in db.stations()}
     for sid, r in todas.items():
         assert r == db.latest(sid)
+
+
+def test_guardar_muchas_lecturas_usa_pocas_idas_y_vueltas(db):
+    from sqlalchemy import event
+    n = {"q": 0}
+    event.listen(db.engine, "before_cursor_execute", lambda *a, **k: n.__setitem__("q", n["q"] + 1))
+    db.record_success("t", [lectura(f"t:{i}") for i in range(300)], started_at=T0, finished_at=T0)
+    assert n["q"] <= 10, f"{n['q']} sentencias para 300 lecturas"
+    assert len(db.stations()) == 300

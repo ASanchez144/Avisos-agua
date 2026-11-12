@@ -23,7 +23,19 @@ def build() -> FastAPI:
         url = os.environ.get("DATABASE_URL")
         if not url:
             raise RuntimeError("Falta DATABASE_URL (cadena de Neon con pooler)")
-        inner = create_app(Database(url, migrate=False))  # las migraciones las aplica el colector
+        db = Database(url, migrate=False)  # las migraciones las aplica el colector
+
+        def collector():
+            # Respaldo del cron de GitHub: un ciclo dentro de la función (≈10-20 s). Abre una conexión que sí migra.
+            from backend.scheduler import run_cycle
+            from collector.run_once import build_connectors
+            rw = Database(url)
+            return run_cycle(build_connectors(rw, include_aemet=has_aemet), rw)
+
+        # Sin AEMET_API_KEY en Vercel no se intenta AEMET (no se marca como caída: la recoge GitHub Actions).
+        has_aemet = bool(os.environ.get("AEMET_API_KEY"))
+        sources = ("saih_cantabrico", "aca", "aemet") if has_aemet else ("saih_cantabrico", "aca")
+        inner = create_app(db, collector=collector, collector_sources=sources)
     outer = FastAPI(title="HidroRed España", docs_url=None, redoc_url=None)
     outer.mount("/api", inner)
     outer.mount("/", inner)
