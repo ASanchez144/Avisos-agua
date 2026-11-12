@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+
+/* Marcadores del mapa: color + icono + letra (no solo color). */
+.hr-marker {
+  display: flex; align-items: center; justify-content: center; gap: 2px;
+  width: 100%; height: 100%; border-radius: 9999px;
+  border: 2px solid #0f172a; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  font-size: 11px; font-weight: 800; line-height: 1;
+}
+.hr-marker svg { width: 13px; height: 13px; }
+.hr-marker.hr-selected { outline: 3px solid #ffffff; outline-offset: 2px; }
+.hr-marker.hr-square { border-radius: 6px; }      /* sin datos / dato antiguo: forma distinta */
+.hr-marker.hr-diamond { border-radius: 4px; transform: rotate(45deg); }
+.hr-marker.hr-diamond > * { transform: rotate(-45deg); }
+.leaflet-container { background: #0b1220; font: inherit; }
+.leaflet-tooltip { background: #0f172a; color: #f1f5f9; border: 1px solid #334155; }
+.leaflet-tooltip-top:before { border-top-color: #334155; }
+.leaflet-control-attribution { background: rgba(15, 23, 42, 0.8) !important; color: #94a3b8 !important; }
+.leaflet-control-attribution a { color: #cbd5e1 !important; }
+.hr-tiles { filter: brightness(0.72) contrast(1.1) saturate(0.7); }
