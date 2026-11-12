@@ -113,3 +113,45 @@ def test_api_devuelve_la_camara_oficial_de_la_estacion(db):
     body = TestClient(create_app(db, now=lambda: NOW, sai_cameras=s)).get("/stations/saih_cantabrico:1424/camera").json()
     assert body["camera"]["kind"] == "aforo" and body["camera"]["status"]["status"] == "OK"
     assert "Confederación Hidrográfica del Cantábrico" in body["camera"]["source_label"]
+
+
+def test_lista_de_estaciones_con_camara_se_cachea_6_horas(db):
+    llamadas, reloj = [], [NOW]
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/robots.txt":
+            return httpx.Response(200, content=(FIX / "robots.txt").read_bytes())
+        llamadas.append(request.content.decode())
+        return httpx.Response(200, content=(FIX / "camaras_lista.json").read_bytes())
+
+    mk = lambda: SaiCameraService(db, client=PoliteHttpClient(transport=httpx.MockTransport(handler), now=lambda: reloj[0]), now=lambda: reloj[0])
+    ids = mk().station_ids()
+    assert len(ids) == 147 and "saih_cantabrico:1424" in ids
+    reloj[0] = NOW + timedelta(hours=5)
+    assert mk().station_ids() == ids and len(llamadas) == 1
+    reloj[0] = NOW + timedelta(hours=7)
+    mk().station_ids()
+    assert len(llamadas) == 2 and "tipo=camaras" in llamadas[0]
+
+
+def test_si_la_lista_falla_nadie_tiene_camara_pero_la_api_sigue(db):
+    def boom(request):
+        if request.url.path == "/robots.txt":
+            return httpx.Response(404)
+        raise httpx.ConnectTimeout("t", request=request)
+    s = SaiCameraService(db, client=PoliteHttpClient(transport=httpx.MockTransport(boom), now=lambda: NOW), now=lambda: NOW)
+    assert s.station_ids() == set()
+
+
+def test_stations_marca_las_que_tienen_camara(db):
+    db.record_success("t", [Reading("saih_cantabrico:1424", "saih_cantabrico", "Ribera", 43.18, -7.2, "Eo", 0.7, 0.14, None, None, None, None, None, NOW - timedelta(minutes=5), NOW, "OK"),
+                           Reading("aca:1", "aca", "X", 41.5, 2.0, None, 1.0, None, None, None, None, None, None, NOW - timedelta(minutes=5), NOW, "OK")], NOW, NOW)
+
+    class Fake:
+        def station_ids(self):
+            return {"saih_cantabrico:1424"}
+
+        def camera(self, sid):
+            return None
+    st = {s["station_id"]: s["has_camera"] for s in TestClient(create_app(db, now=lambda: NOW, sai_cameras=Fake())).get("/stations").json()["stations"]}
+    assert st == {"saih_cantabrico:1424": True, "aca:1": False}

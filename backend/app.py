@@ -10,7 +10,6 @@ from fastapi import FastAPI, HTTPException, Query
 
 from backend.cameras import CameraChecker
 from backend.db import Database
-from connectors.saih_cantabrico_cameras import SaiCameraService
 from connectors.base import iso_utc, parse_iso_utc
 from engine.cameras import CameraConfig, load_cameras
 from engine.geo import haversine_km
@@ -42,7 +41,7 @@ def create_app(
     table = links or load_links(DEFAULT_LINKS)
     camera_cfg = cameras or (CameraConfig(3.0, 20, ()) if demo else load_cameras(DEFAULT_CAMERAS))
     checker = camera_checker or CameraChecker(stale_after_minutes=camera_cfg.stale_after_minutes)
-    sai = sai_cameras if sai_cameras is not None else (None if demo else SaiCameraService(db))
+    sai = sai_cameras  # se activa explícitamente en backend/main.py y api/index.py (los tests no tocan la red)
 
     def propagation_now() -> list[dict[str, Any]]:
         return evaluate(table, lambda station_id: db.history(station_id, limit=HISTORY_FOR_TRIGGERS), now())
@@ -68,13 +67,21 @@ def create_app(
             cache[source] = run is None or run["ok"]
         return cache[source]
 
-    def view(station: dict[str, Any], cache: dict[str, bool], latest_map: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    def camera_ids() -> set[str]:
+        try:
+            return sai.station_ids() if sai is not None else set()
+        except Exception:  # sin lista de cámaras la API sigue funcionando
+            return set()
+
+    def view(station: dict[str, Any], cache: dict[str, bool], latest_map: Optional[dict[str, Any]] = None,
+             cams: Optional[set[str]] = None) -> dict[str, Any]:
         latest = latest_map.get(station["station_id"]) if latest_map is not None else db.latest(station["station_id"])
         ok = source_ok(station["source"], cache)
         return {
             **station,
             **station_status(latest, now(), source_ok=ok),
             "source_ok": ok,
+            "has_camera": station["station_id"] in (cams or set()),
             "latest": latest.to_dict() if latest else None,
         }
 
@@ -94,7 +101,8 @@ def create_app(
     def stations() -> dict[str, Any]:
         cache: dict[str, bool] = {}
         latest = db.latest_all() if hasattr(db, "latest_all") else None
-        return envelope(stations=[view(s, cache, latest) for s in db.stations()])
+        cams = camera_ids()
+        return envelope(stations=[view(s, cache, latest, cams) for s in db.stations()])
 
     @app.get("/stations/{station_id}/history")
     def history(station_id: str, limit: int = Query(100, ge=1, le=1000)) -> dict[str, Any]:

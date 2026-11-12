@@ -42,4 +42,5 @@ else:
         if scheduler is not None:
             scheduler.shutdown(wait=False)
 
-    app = create_app(db, lifespan=lifespan)
+    from connectors.saih_cantabrico_cameras import SaiCameraService
+    app = create_app(db, lifespan=lifespan, sai_cameras=SaiCameraService(db))

@@ -1,3 +1,4 @@
+import { Camera } from 'lucide-react';
 import { STATUS } from '../lib/status.js';
 
 /** Leyenda: cada estado con su icono, su letra y su nombre. */
@@ -16,6 +17,10 @@ export default function Legend() {
             {meta.label}
           </li>
         ))}
+        <li className="flex items-center gap-2">
+          <span aria-hidden="true" className="flex h-6 w-9 items-center justify-center"><Camera className="h-4 w-4" /></span>
+          Estación con cámara oficial que enfoca el río
+        </li>
         <li className="flex items-center gap-2">
           <span aria-hidden="true" className="flex h-7 w-9 items-center justify-center rounded-full border-2 border-slate-900 bg-slate-300 text-xs font-extrabold text-slate-900">12</span>
           Grupo de estaciones: lleva el color del PEOR estado

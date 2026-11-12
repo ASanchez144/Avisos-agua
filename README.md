@@ -1,4 +1,4 @@
-# HidroRed España
+# Aguas Arriba (antes HidroRed España)
 
 Radar ciudadano de caudales, embalses y lluvia en España con datos públicos.
 

@@ -3,6 +3,7 @@ import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import { useEffect, useMemo } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { Camera } from 'lucide-react';
 import { MapContainer, Polygon, Polyline, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import { etaRangeText } from '../lib/format.js';
 import { statusMeta, WARNING_COLORS, worstStatus } from '../lib/status.js';
@@ -11,14 +12,16 @@ const SPAIN = [[35.8, -9.6], [43.9, 4.4]];
 const SHAPE = { SIN_DATOS: 'hr-square', DATO_OBSOLETO: 'hr-square', SIN_UMBRAL: 'hr-diamond' };
 
 
-function icon(status, selected) {
+const CAMERA_BADGE = renderToStaticMarkup(<Camera aria-hidden="true" />);
+
+function icon(status, selected, hasCamera = false) {
   const meta = statusMeta(status);
   const shape = SHAPE[status ?? 'SIN_UMBRAL'] || '';
   const size = selected ? 38 : 30;
   // Color + icono + letra + forma: el estado no depende solo del color.
   const html = `<div class="hr-marker ${shape} ${selected ? 'hr-selected' : ''}" style="background:${meta.color};color:${meta.text}">${renderToStaticMarkup(
     <meta.Icon aria-hidden="true" />,
-  )}<span>${meta.short}</span></div>`;
+  )}<span>${meta.short}</span>${hasCamera ? `<span class="hr-cam" title="Con cámara del río">${CAMERA_BADGE}</span>` : ''}</div>`;
   return L.divIcon({ html, className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
 }
 
@@ -61,9 +64,9 @@ function ClusterLayer({ stations, selectedId, onSelect }) {
     const group = L.markerClusterGroup({ maxClusterRadius: 45, showCoverageOnHover: false, iconCreateFunction: clusterIcon, chunkedLoading: true });
     stations.filter(hasCoords).forEach((s) => {
       const meta = statusMeta(s.status);
-      const label = `${s.name}: ${meta.label}`;
+      const label = `${s.name}: ${meta.label}${s.has_camera ? ' · con cámara del río' : ''}`;
       const marker = L.marker([s.lat, s.lon], {
-        icon: icon(s.status, s.station_id === selectedId), title: label, alt: label, status: s.status,
+        icon: icon(s.status, s.station_id === selectedId, s.has_camera), title: label, alt: label, status: s.status,
         zIndexOffset: s.station_id === selectedId ? 1000 : s.status === 'ALERTA' ? 500 : 0,
       });
       marker.bindTooltip(label, { direction: 'top', offset: [0, -14] });

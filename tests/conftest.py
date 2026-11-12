@@ -47,3 +47,22 @@ def only_feature(payload: dict, code: str) -> bytes:
     feat = feature_by_code(payload, code)
     payload["data"]["features"] = [feat]
     return json.dumps(payload).encode()
+
+
+@pytest.fixture(autouse=True)
+def _sin_red(monkeypatch, request):
+    """Los tests no salen a internet (salvo el arnés con HIDRORED_HARNESS_LIVE=1)."""
+    import os
+    import socket
+    if os.environ.get("HIDRORED_HARNESS_LIVE") == "1" or "HIDRORED_TEST_PG_URL" in os.environ and "postgres" in request.node.name:
+        return
+    for var in ("HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy", "ALL_PROXY", "all_proxy"):
+        monkeypatch.delenv(var, raising=False)  # sin proxy: una petición real fallaría contra la guarda
+    real = socket.socket.connect
+
+    def guard(self, address, *a, **kw):
+        host = address[0] if isinstance(address, tuple) else address
+        if host not in ("127.0.0.1", "::1", "localhost") and not str(host).startswith("/"):
+            raise RuntimeError(f"un test ha intentado salir a la red: {address}")
+        return real(self, address, *a, **kw)
+    monkeypatch.setattr(socket.socket, "connect", guard)

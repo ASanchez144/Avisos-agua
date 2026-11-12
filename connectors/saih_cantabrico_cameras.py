@@ -21,6 +21,7 @@ URL = "https://visor.saichcantabrico.es/wp-admin/admin-ajax.php"
 ORIGIN = "https://visor.saichcantabrico.es/"
 IMAGE_HOST = "visor.saichcantabrico.es"
 PREFIX = "saih_cantabrico:"
+LIST_CACHE = timedelta(hours=6)       # la lista de cámaras casi no cambia
 CACHE = timedelta(minutes=15)          # 1 petición por cámara cada 15 min
 STALE_AFTER = timedelta(minutes=120)   # las fotos se renuevan cada 20-60 min según la estación
 SOURCE_LABEL = "Cámara oficial de la Confederación Hidrográfica del Cantábrico en la estación de aforo"
@@ -85,6 +86,20 @@ class SaiCameraService:
         if hasattr(self.db, "camera_cache_put"):
             self.db.camera_cache_put(code, payload, self._now())
         return payload
+
+    def station_ids(self) -> set[str]:
+        """Estaciones del Cantábrico que tienen cámara (lista oficial, 1 petición cada 6 h)."""
+        cached = self.db.camera_cache_get("__lista__") if hasattr(self.db, "camera_cache_get") else None
+        if cached and self._now() - cached[0] < LIST_CACHE:
+            return set(cached[1]["ids"])
+        try:
+            raw = self.client.request("POST", URL, data={"action": "peticion_cincominutal", "tipo": "camaras"}).body
+            ids = sorted(parse_camera_list(raw))
+        except ConnectorError:
+            return set(cached[1]["ids"]) if cached else set()
+        if hasattr(self.db, "camera_cache_put"):
+            self.db.camera_cache_put("__lista__", {"ids": ids}, self._now())
+        return set(ids)
 
     def camera(self, station_id: str) -> Optional[dict[str, Any]]:
         if not station_id.startswith(PREFIX):

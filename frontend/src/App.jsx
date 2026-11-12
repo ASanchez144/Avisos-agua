@@ -1,4 +1,4 @@
-import { CloudRain, Waves } from 'lucide-react';
+import { Camera, CloudRain, Waves } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from './api.js';
 import AlertBanner from './components/AlertBanner.jsx';
@@ -7,9 +7,10 @@ import Legend from './components/Legend.jsx';
 import LegalBar from './components/LegalBar.jsx';
 import MapView from './components/MapView.jsx';
 import StationPanel from './components/StationPanel.jsx';
+import { APP_NAME } from './lib/brand.js';
+import { cameraCount, filterStations, hasRainSources as anyRain } from './lib/stations.js';
 
 const REFRESH_MS = 5 * 60 * 1000;
-const RAIN_ONLY_SOURCES = new Set(['aemet']); // pluviómetros: se muestran solo si se piden
 
 export default function App() {
   const [stations, setStations] = useState([]);
@@ -19,6 +20,7 @@ export default function App() {
   const [error, setError] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [showRain, setShowRain] = useState(false);
+  const [onlyCameras, setOnlyCameras] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [detail, setDetail] = useState(null);
   const [now, setNow] = useState(() => new Date());
@@ -70,18 +72,16 @@ export default function App() {
     return () => { cancelled = true; };
   }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const visible = useMemo(
-    () => stations.filter((s) => showRain || !RAIN_ONLY_SOURCES.has(s.source)),
-    [stations, showRain],
-  );
-  const hasRainSources = stations.some((s) => RAIN_ONLY_SOURCES.has(s.source));
+  const visible = useMemo(() => filterStations(stations, { showRain, onlyCameras }), [stations, showRain, onlyCameras]);
+  const hasRainSources = anyRain(stations);
+  const nCameras = cameraCount(stations);
 
   return (
     <div className="flex h-full flex-col bg-slate-950 text-slate-100">
       {demo && <DemoBadge />}
       <header className="flex items-center gap-2 border-b border-slate-800 bg-slate-900 px-3 py-2">
         <Waves aria-hidden="true" className="h-6 w-6 text-sky-400" />
-        <h1 className="text-base font-extrabold sm:text-lg">HidroRed España</h1>
+        <h1 className="text-base font-extrabold sm:text-lg">{APP_NAME}</h1>
         <span className="ml-auto text-xs text-slate-400">{loaded && !error ? `${visible.length} estaciones` : ''}</span>
       </header>
       <AlertBanner alerts={alerts} error={error} />
@@ -92,6 +92,13 @@ export default function App() {
             warnings={alerts?.weather_warnings?.items || []} selectedId={selectedId} onSelect={setSelectedId} />
           <div className="pointer-events-none absolute left-2 top-2 z-[1000] flex max-w-[70%] flex-col items-start gap-2">
             <div className="pointer-events-auto"><Legend /></div>
+            {nCameras > 0 && (
+              <label className="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-xl border border-slate-600 bg-slate-900/95 px-3 py-2 text-sm font-semibold shadow-lg">
+                <input type="checkbox" className="h-4 w-4" checked={onlyCameras} onChange={(e) => setOnlyCameras(e.target.checked)} />
+                <Camera aria-hidden="true" className="h-4 w-4" />
+                Solo con cámara del río ({nCameras})
+              </label>
+            )}
             {hasRainSources && (
               <label className="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-xl border border-slate-600 bg-slate-900/95 px-3 py-2 text-sm font-semibold shadow-lg">
                 <input type="checkbox" className="h-4 w-4" checked={showRain} onChange={(e) => setShowRain(e.target.checked)} />
