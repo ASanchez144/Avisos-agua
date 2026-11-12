@@ -23,7 +23,7 @@ export default function Hydrograph({ history }) {
   const y = (v) => H - PAD - (v / maxFlow) * (H - RAIN_H - 3 * PAD);
   const line = flows.map((r, i) => `${i ? 'L' : 'M'}${x(r).toFixed(1)},${y(r.flow_m3s).toFixed(1)}`).join(' ');
   const hours = Math.round(((t1 - t0) / 3600000) * 10) / 10;
-  const barWidth = Math.max(1.5, (W - 2 * PAD) / Math.max(rains.length, 1) - 1);
+  const barWidth = Math.min(8, Math.max(1.5, (W - 2 * PAD) / Math.max(rains.length, 1) - 1));
   return (
     <figure>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"

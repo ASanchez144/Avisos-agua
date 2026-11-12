@@ -64,6 +64,7 @@ export default function StationPanel({ station, history, now = new Date(), demo 
       </header>
 
       <div className="flex-1 space-y-3 overflow-y-auto p-3">
+        {!demo && station.has_camera !== false && <CameraView stationId={station.station_id} now={now} />}
         {noData ? (
           <p role="alert" className="flex items-start gap-2 rounded-lg border border-slate-500 bg-slate-800 p-3 text-sm font-semibold text-slate-100">
             <WifiOff aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0" />
@@ -127,7 +128,6 @@ export default function StationPanel({ station, history, now = new Date(), demo 
             </div>
           </>
         )}
-        {!demo && <CameraView stationId={station.station_id} now={now} />}
         <SensorGuide />
         <p className="text-xs text-slate-500">Fuente del dato: {station.source}. Identificador: {station.station_id}.</p>
       </div>
