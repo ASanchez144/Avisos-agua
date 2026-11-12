@@ -159,12 +159,12 @@ def create_app(
             finished = parse_iso_utc(run["finished_at_utc"]) if run else None
             ages.append(None if finished is None else int((current - finished).total_seconds() // 60))
         if ages and all(a is not None and a < collect_every_minutes for a in ages):
-            return envelope(ran=False, reason="datos recientes", oldest_minutes=max(ages))
+            return envelope(ran=False, reason="datos recientes", oldest_minutes=max(ages), sources=list(collector_sources))
         try:
             summary = collector()
         except Exception as exc:  # la API sigue respondiendo aunque falle la recogida
             return envelope(ran=False, reason=f"{type(exc).__name__}: la recogida falló")
-        return envelope(ran=True, summary=summary)
+        return envelope(ran=True, summary=summary, sources=list(collector_sources))
 
     @app.get("/alerts")
     def alerts() -> dict[str, Any]:

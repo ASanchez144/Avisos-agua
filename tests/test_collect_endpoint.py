@@ -33,6 +33,7 @@ def test_con_datos_recientes_no_hace_nada(tmp_path):
         db.record_failure(s, "x", started_at=T0 - timedelta(minutes=5), finished_at=T0 - timedelta(minutes=5))
     body = app(db, llamadas).post("/collect").json()
     assert body["ran"] is False and llamadas == [] and body["oldest_minutes"] == 5
+    assert body["sources"] == list(FUENTES)  # solo nombres de fuente, nunca claves
 
 
 def test_si_una_fuente_lleva_mas_de_14_min_se_lanza(tmp_path):
